@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Soil Variability Estimation</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="http://js.arcgis.com/3.14/esri/css/esri.css">
+	<script src="http://js.arcgis.com/3.14/"></script>
+	<link rel="stylesheet" href="style.css" />
+	<link rel="stylesheet" href="http://js.arcgis.com/3.14/dijit/themes/soria/soria.css"/>
+	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
+
+</head>
+<body class="soria">
+
+	<header>
+        <h1>Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data</h1>
+        <ul class="steps">
+			<li>Step 1: Draw (or import) your field boundary.</li>
+			<li>Step 2: Define average soil levels for that field.</li>
+			<li>Step 3: Click "Generate Map".</li>
+			<li>Step 4: View and/or download the map to aid in management.</li>
+		</ul>
+		
+		<!--<p><span>Step 1: Draw (or import) your field boundary.</span>
+			<span>Step 2: Define average soil levels for that field. </span>
+			<spand>Step 3: Click "Generate Map".</spand>
+			<span>Step 4: View and/or download the map to aid in management.</span></p>
+		-->
+	</header>
+	  
+	<!--<div id="header" class="roundedCorners" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
+		<div id="mainheader">Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data </div>
+		<div id="subheader">1. Draw (or import) your field boundary. 2. Define average soil levels for that field.
+			3. Click "Generate Map". 4. View and/or download the map to aid in management.</div>
+		<!--<span id="drawBoundary" class="button"></span><strong>Draw Boundary</strong> </span>
+		
+	</div>-->
+	
+	<div id="banner">
+		<!-- These buttons will be used to edit polygons -->
+		<a data-dojo-type="dijit/form/Button" class="button"><strong>Draw Boundary</strong></a>
+		<a class="button"><strong>Import Boundary</strong></a>
+		<a class="button"><strong>Clear Boundary</strong></a>
+		<a class="button"><strong>Average Soil Test Levels</strong></a>
+		<a class="button"><strong>Generate Map</strong></a>
+		<a class="button"><strong>Download Data Layer</strong></a>
+
+		<!--<a href="http://www.swac.umn.edu/directory/grad-students/tyler-nigon" class="button link"><strong>View University of Minnesota Profile</strong></a>
+        -->
+	</div><!-- end banner -->
+	
+	<!-- this div is where the map will live -->
+	<div id="mapDiv"></div>
+
+	<!-- Script tag pointing to script.js -->
+	<script type="text/javascript" src="script.js"></script>
+</body>
+</html>
