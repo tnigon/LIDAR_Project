@@ -9,7 +9,7 @@
 	<script src="http://js.arcgis.com/3.14/"></script>
 	<link rel="stylesheet" href="style.css" />
 	<link rel="stylesheet" href="http://js.arcgis.com/3.14/dijit/themes/soria/soria.css"/>
-	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
 
 </head>
 <body class="soria">
@@ -37,15 +37,17 @@
 		<!--<span id="drawBoundary" class="button"></span><strong>Draw Boundary</strong> </span>
 		
 	</div>-->
-	
+	<!-- href="#draw-boundary"  -->
 	<div id="banner">
 		<!-- These buttons will be used to edit polygons -->
-		<a data-dojo-type="dijit/form/Button" class="button"><strong>Draw Boundary</strong></a>
-		<a class="button"><strong>Import Boundary</strong></a>
-		<a class="button"><strong>Clear Boundary</strong></a>
-		<a class="button"><strong>Average Soil Test Levels</strong></a>
-		<a class="button"><strong>Generate Map</strong></a>
-		<a class="button"><strong>Download Data Layer</strong></a>
+		<a id="draw-boundary" class="button"><strong>Draw Boundary</strong></a>
+	<!--	<a id="draw-boundary" class="button" data-dojo-type="dijit/form/Button"><strong>Draw Boundary</strong></a>
+		-->
+		<a id="import-boundary" class="button"><strong>Import Boundary</strong></a>
+		<a id="clear-boundary" class="button"><strong>Clear Boundary</strong></a>
+		<a id="add-soil-data" class="button"><strong>Average Soil Test Levels</strong></a>
+		<a id="generate-map" class="button"><strong>Generate Map</strong></a>
+		<a id="download-data" class="button"><strong>Download Data Layer</strong></a>
 
 		<!--<a href="http://www.swac.umn.edu/directory/grad-students/tyler-nigon" class="button link"><strong>View University of Minnesota Profile</strong></a>
         -->
