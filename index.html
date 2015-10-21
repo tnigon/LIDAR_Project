@@ -40,7 +40,13 @@
 	<!-- href="#draw-boundary"  -->
 	<div id="banner">
 		<!-- These buttons will be used to edit polygons -->
-		<a id="draw-boundary" class="button"><strong>Draw Boundary</strong></a>
+		<!--<a id="draw-boundary" class="button"><strong>Draw Boundary</strong></a> -->
+		
+		<select id="draw-boundary" class="button" onchange="drawPolygon(this)">
+			<option value="default" selected disabled hidden>Draw Boundary</option> <!-- disabled hidden hides the -->
+			<option value="polygon">Polygon</option>
+			<option value="freehand-polygon">Freehand Polygon</option>
+		</select>
 	<!--	<a id="draw-boundary" class="button" data-dojo-type="dijit/form/Button"><strong>Draw Boundary</strong></a>
 		-->
 		<a id="import-boundary" class="button"><strong>Import Boundary</strong></a>
