@@ -11,14 +11,14 @@ require([
 	"esri/symbols/SimpleLineSymbol",
 	"esri/symbols/FillSymbol",
 	"esri/Color",
-	"esri.Geometry",
+	//"esri.Geometry",
 	
 	"dijit/registry",
 	"dojo/domReady!"
 	], function (
 	Map, Draw, Graphic, 
 	SimpleFillSymbol, SimpleLineSymbol, FillSymbol, Color,
-	Geometry,
+	//Geometry,
 	registry ) {
 		map = new Map("mapDiv", {
 		//extent: new Extent(-98, -42, -91, 48),
