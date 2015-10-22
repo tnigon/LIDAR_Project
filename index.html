@@ -8,55 +8,41 @@
 	<link rel="stylesheet" href="http://js.arcgis.com/3.14/esri/css/esri.css">
 	<script src="http://js.arcgis.com/3.14/"></script>
 	<link rel="stylesheet" href="style.css" />
-	<link rel="stylesheet" href="http://js.arcgis.com/3.14/dijit/themes/soria/soria.css"/>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
 
 </head>
-<body class="soria">
-
+<body>
 	<header>
         <h1>Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data</h1>
-        <ul class="steps">
-			<li>Step 1: Draw (or import) your field boundary.</li>
-			<li>Step 2: Define average soil levels for that field.</li>
-			<li>Step 3: Click "Generate Map".</li>
-			<li>Step 4: View and/or download the map to aid in management.</li>
+        <nav>
+		<ul id="steps">
+			<li>Information
+				<ul>
+					<li>Step 1: Draw (or import) your field boundary.</li>
+					<li>Step 2: Define average soil levels for that field.</li>
+					<li>Step 3: Click "Generate Map".</li>
+					<li>Step 4: View and/or download the map to aid in management.</li>
+				</ul>
+			</li>
 		</ul>
-		
-		<!--<p><span>Step 1: Draw (or import) your field boundary.</span>
-			<span>Step 2: Define average soil levels for that field. </span>
-			<spand>Step 3: Click "Generate Map".</spand>
-			<span>Step 4: View and/or download the map to aid in management.</span></p>
-		-->
+		</nav>
+
 	</header>
-	  
-	<!--<div id="header" class="roundedCorners" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
-		<div id="mainheader">Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data </div>
-		<div id="subheader">1. Draw (or import) your field boundary. 2. Define average soil levels for that field.
-			3. Click "Generate Map". 4. View and/or download the map to aid in management.</div>
-		<!--<span id="drawBoundary" class="button"></span><strong>Draw Boundary</strong> </span>
-		
-	</div>-->
-	<!-- href="#draw-boundary"  -->
+
 	<div id="banner">
 		<!-- These buttons will be used to edit polygons -->
 		<!--<a id="draw-boundary" class="button"><strong>Draw Boundary</strong></a> -->
-		
 		<select id="draw-boundary" class="button" onchange="drawPolygon(this)">
 			<option value="default" selected disabled hidden>Draw Boundary</option> <!-- disabled hidden hides the -->
 			<option value="polygon">Polygon</option>
 			<option value="freehand-polygon">Freehand Polygon</option>
 		</select>
-	<!--	<a id="draw-boundary" class="button" data-dojo-type="dijit/form/Button"><strong>Draw Boundary</strong></a>
-		-->
 		<a id="import-boundary" class="button"><strong>Import Boundary</strong></a>
 		<a id="clear-boundary" class="button"><strong>Clear Boundary</strong></a>
 		<a id="add-soil-data" class="button"><strong>Average Soil Test Levels</strong></a>
 		<a id="generate-map" class="button"><strong>Generate Map</strong></a>
 		<a id="download-data" class="button"><strong>Download Data Layer</strong></a>
 
-		<!--<a href="http://www.swac.umn.edu/directory/grad-students/tyler-nigon" class="button link"><strong>View University of Minnesota Profile</strong></a>
-        -->
 	</div><!-- end banner -->
 	
 	<!-- this div is where the map will live -->

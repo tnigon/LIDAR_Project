@@ -3,10 +3,11 @@
 functionality is there
 green color: #008A2E
 maroon color: #7a0019
+light maroon: #F2E6E8
 gold color:  #ffce38
 dark gold color: #9d7f0d
 dark charcoal: #393939
-
+light gray: #F2F2F2
 */
 
 html, body, #mapDiv { 
@@ -167,17 +168,30 @@ header {
   right: 0;
   width: 100%;
   text-align: center;
-  background: #7a0019; /* original blue color: <url(../images/background.png) #4276b6> */
-  -moz-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  -webkit-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  -o-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
+  border: 1px solid #F2F2F2;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #933045), color-stop(100%, #933045));
+  background: -webkit-linear-gradient(#933045, #7a0019);
+  background: -moz-linear-gradient(#933045, #7a0019);
+  background: -o-linear-gradient(#933045, #7a0019);
+  background: -ms-linear-gradient(#933045, #7a0019);
+  background: linear-gradient(#933045, #7a0019);
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -o-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  border-radius: 2px;
+  -moz-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  background-color: #F2E6E8;
   z-index: 99;
   -webkit-font-smoothing: antialiased;
-  min-height: 76px;
+  height: 24px;
 }
 header h1 {
-  font: 40px/48px "Copse", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 20px/24px "Copse", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #f3f3f3;
   text-shadow: 0px 2px 0px #235796;
   margin: 0px;
@@ -200,13 +214,66 @@ ul	{
 	-webkit-margin-after:0em;
 }
 
-.steps ul {
-	margin: 0;
+/* Resets */
+/*nav a { 
+    text-decoration: none;
+    font: 12px/1 Verdana;
+    color: #000;
+    display: block; }
+nav a:hover { text-decoration: underline; }
+nav ul { 
+    list-style: none;
+    margin: 0;
+    padding: 0; }
+nav ul li { margin: 0; padding: 0; }
+
+/* Top-level menu */
+/*nav > ul > li { 
+    float: left;
+    position: relative; }
+nav > ul > li > a { 
+    padding: 10px 30px;
+    border-left: 1px solid #000;
+    display: block;}
+nav > ul > li:first-child { margin: 0; }
+nav > ul > li:first-child a { border: 0; }
+
+/* Dropdown Menu */
+/*nav ul li ul { 
+    position: absolute;
+    background: #ccc;
+    width: 100%; 
+    margin: 0;
+    padding: 0;
+    display: none; }
+nav ul li ul li { 
+    text-align: center;
+    width: 100%; }
+nav ul li ul a { padding: 10px 0; }
+nav ul li:hover ul { display: block; }
+
+/* Resets */
+nav  { 
+    position: relative;
+	left: 90%;
+	width: 30%;
+	top: -100%;
+	list-style: none;
+    margin: 0px;
+    padding: 0px; 
+}
+nav ul li { 
+	margin: 0; 
 	padding: 0;
+	
 }
 
-.steps li {
-	display: inline-block;
+/* Top-level menu */
+header nav > ul > li {
+	position: relative;
+	float: left;
+	width: 20%;
+	display: block;
 	margin: 0;
 	padding: 0;
 	color: #d8d8d8;
@@ -215,6 +282,68 @@ ul	{
 	padding-right:0px;
 }
 
+nav ul li ul li { 
+	position: relative;
+    width: 500%; 
+	height: 100%;
+    margin: 0;
+    display: none;
+    text-align: left;
+	background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
+	background: -webkit-linear-gradient(#ffe788, #ffce38);
+	background: -moz-linear-gradient(#ffe788, #ffce38);
+	background: -o-linear-gradient(#ffe788, #ffce38);
+	background: -ms-linear-gradient(#ffe788, #ffce38);
+	background: linear-gradient(#ffe788, #ffce38); 
+	margin-left: 0px;
+	padding: 10px 12px;
+	margin-top: 0px;
+	line-height: 14px;
+	font-size: 14px;
+	color: #333;
+	font-weight: bold;
+	text-align: left;
+	position: relative;
+	top: 61%
+}
+
+nav ul li ul { padding: 0px 0; 
+	width: 80%;
+	position: absolute;
+	left: -370px;
+}
+nav ul li:hover ul li { 
+	display: block;
+	
+	position: relative;
+	border: 1px solid #dba500;
+	/*background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
+	background: -webkit-linear-gradient(#ffe788, #ffce38);
+	background: -moz-linear-gradient(#ffe788, #ffce38);
+	background: -o-linear-gradient(#ffe788, #ffce38);
+	background: -ms-linear-gradient(#ffe788, #ffce38);
+	background: linear-gradient(#ffe788, #ffce38);*/
+}
+
+/*
+div ul li:hover .steps{
+	display: block;
+}
+.steps ul {
+	margin: 0;
+	padding: 0;
+}
+
+.steps li {
+	display: none;
+	margin: 0;
+	padding: 0;
+	color: #d8d8d8;
+	text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
+	font-size: 18px;
+	padding-right:0px;
+}
+*/
 /*.steps a {
 	background: #395870;
 	background: linear-gradient(#49708f, #293f50);
@@ -243,13 +372,14 @@ header li {
 }
 */
 #banner {
-  z-index: 10;
+  z-index: 100;
   /*left: 0%;*/ /*Took out so buttons are on the right side of the screen*/
   right: 0%;
-  height: 100%;
-  width: 210px;
+  top: 3%;
+  height: 0%; 
+  width: 10%;
   margin-right: 0px;
-  position: fixed;
+  position: relative;
   bottom: 0px;
   /*background: #ffcc00;*/ /* Take the solid color out to make it look nicer*/
   /*border: 1px solid #f0b500; */
@@ -358,7 +488,7 @@ header li {
   }
 
   #banner {
-    width: 100%;
+    width: 28%;
   }
   #banner .downloads {
     margin-right: 60px;
@@ -406,7 +536,7 @@ header li {
   }
 
   #banner {
-    top: 80px;
+    top: 40px;
   }
   #banner .link {
     float: left;
