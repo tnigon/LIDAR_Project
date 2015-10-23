@@ -1,39 +1,44 @@
-
 <!DOCTYPE html>
 <html>
-<head>
-	<title>Soil Variability Estimation</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-	<link rel="stylesheet" href="http://js.arcgis.com/3.14/esri/css/esri.css">
-	<script src="http://js.arcgis.com/3.14/"></script>
-	<link rel="stylesheet" href="style.css" />
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
-
-</head>
-<body>
+	<head>
+		<title>Soil Variability Estimation</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<!-- <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no"> -->
+		<!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+		on iOS devices-->
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+		<link rel="stylesheet" href="http://js.arcgis.com/3.14/esri/css/esri.css">
+		<link rel="stylesheet" href="style2.css">
+		<script src="http://js.arcgis.com/3.14/"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
+		<script type="text/javascript" src="script2.js"></script>
+	</head>
+	
+	<body>
 	<header>
-        <h1>Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data</h1>
-        <nav>
-		<ul id="steps">
-			<li>Information
-				<ul>
-					<li>Step 1: Draw (or import) your field boundary.</li>
-					<li>Step 2: Define average soil levels for that field.</li>
-					<li>Step 3: Click "Generate Map".</li>
-					<li>Step 4: View and/or download the map to aid in management.</li>
-				</ul>
-			</li>
-		</ul>
-		</nav>
+		<h1>Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data</h1>
+		<div id="infoIcon" class="instructions">
+			<span id="inst" class="esriSimpleSlider">What does this application do?</span>
+		</div>
 
+		<div id="instructionSteps" class="steps">
+			<ul style="list-style: none;">
+				<li><strong>Instructions to create your soil variability map</strong></li>
+				<br>
+				<li>Step 1: Draw (or import) your field boundary.</li>
+				<li>Step 2: Define average soil levels for that field.</li>
+				<li>Step 3: Click "Generate Map".</li>
+				<li>Step 4: View and/or download the map to aid in management.</li>
+			</ul>
+		</div>
 	</header>
-
+	
+	<div id="mapDiv"></div>
+	
 	<div id="banner">
 		<!-- These buttons will be used to edit polygons -->
-		<!--<a id="draw-boundary" class="button"><strong>Draw Boundary</strong></a> -->
 		<select id="draw-boundary" class="button" onchange="drawPolygon(this)">
-			<option value="default" selected disabled hidden>Draw Boundary</option> <!-- disabled hidden hides the -->
+			<option value="default" selected disabled hidden>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Draw Boundary</option> <!-- disabled hidden hides the -->
 			<option value="polygon">Polygon</option>
 			<option value="freehand-polygon">Freehand Polygon</option>
 		</select>
@@ -42,13 +47,14 @@
 		<a id="add-soil-data" class="button"><strong>Average Soil Test Levels</strong></a>
 		<a id="generate-map" class="button"><strong>Generate Map</strong></a>
 		<a id="download-data" class="button"><strong>Download Data Layer</strong></a>
-
+	
 	</div><!-- end banner -->
 	
-	<!-- this div is where the map will live -->
-	<div id="mapDiv"></div>
-
-	<!-- Script tag pointing to script.js -->
-	<script type="text/javascript" src="script.js"></script>
-</body>
+	<div id="info" class="esriSimpleSlider"><strong>Boundary Information:</strong>
+		<br>
+		<span class="label">Area:</span> <span id="area"></span>
+		<br>
+		<span class="label">Perimeter:</span> <span id="perimeter"></span>
+	</div>
+	</body>
 </html>

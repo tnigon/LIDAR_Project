@@ -10,16 +10,10 @@ dark charcoal: #393939
 light gray: #F2F2F2
 */
 
-html, body { 
+html, body, #mapDiv { 
     height: 100%; width: 100%; margin: 0; padding: 0; 
 } 
 
-#mapDiv { 
-    height: 96%; 
-	width: 100%; 
-	margin-top: 20px;
-	padding: 0; 
-} 
 /* =============================================================================
    Typography
    ========================================================================== */
@@ -221,48 +215,78 @@ ul	{
 }
 
 /* Resets */
-.instructions {
-    background: url(../LIDAR_Project/images/information_36px.png);
-	display: inline;	
-	z-index:100;
-	height: 36px;
-	width: 36px;
-	position: absolute;
-	right: 2%;
-	top: 10%;
-	margin: 0px;
-	/*TRANSITION*/
-    transition: margin 0.1s ease;
-}
+/*nav a { 
+    text-decoration: none;
+    font: 12px/1 Verdana;
+    color: #000;
+    display: block; }
+nav a:hover { text-decoration: underline; }
+nav ul { 
+    list-style: none;
+    margin: 0;
+    padding: 0; }
+nav ul li { margin: 0; padding: 0; }
 
-span#inst{
-	display: none;
-	top: 16px;
-    color: #444;
-    height: auto;
-    font-family: arial;
-    right: 70%;
-    margin: 5px;
-    padding: 0px 10px 0px 10px;
+/* Top-level menu */
+/*nav > ul > li { 
+    float: left;
+    position: relative; }
+nav > ul > li > a { 
+    padding: 10px 30px;
+    border-left: 1px solid #000;
+    display: block;}
+nav > ul > li:first-child { margin: 0; }
+nav > ul > li:first-child a { border: 0; }
+
+/* Dropdown Menu */
+/*nav ul li ul { 
     position: absolute;
-    text-align: left;
-    width: 200px;
-    z-index: 40;
+    background: #ccc;
+    width: 100%; 
+    margin: 0;
+    padding: 0;
+    display: none; }
+nav ul li ul li { 
+    text-align: center;
+    width: 100%; }
+nav ul li ul a { padding: 10px 0; }
+nav ul li:hover ul { display: block; }
+
+/* Resets */
+nav  { 
+    position: relative;
+	left: 90%;
+	width: 30%;
+	top: -100%;
+	list-style: none;
+    margin: 0px;
+    padding: 0px; 
+}
+nav ul li { 
+	margin: 0; 
+	padding: 0;
 	
 }
 
-.instructions:hover #inst.esriSimpleSlider {
+/* Top-level menu */
+header nav > ul > li {
+	position: relative;
+	float: left;
+	width: 20%;
 	display: block;
-	margin: 0 0 0 5px;
-	line-height: 35px;
+	margin: 0;
+	padding: 0;
+	color: #d8d8d8;
+	text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
+	font-size: 18px;
+	padding-right:0px;
 }
 
-.steps {
-	position: absolute;
-    width: auto; 
-	height: auto;
-	top: 45px;
-	right: 1%;
+nav ul li ul li { 
+	position: relative;
+    width: 500%; 
+	height: 100%;
+    margin: 0;
     display: none;
     text-align: left;
 	background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
@@ -271,36 +295,91 @@ span#inst{
 	background: -o-linear-gradient(#ffe788, #ffce38);
 	background: -ms-linear-gradient(#ffe788, #ffce38);
 	background: linear-gradient(#ffe788, #ffce38); 
-	border: 1px solid #dba500;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	-o-border-radius: 2px;
-	-ms-border-radius: 2px;
-	-khtml-border-radius: 2px;
-	border-radius: 2px;
-	-moz-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
-	-webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
-	-o-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
-	box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
-	line-height: 24px;
-	font-size: 18px;
+	margin-left: 0px;
+	padding: 10px 12px;
+	margin-top: 0px;
+	line-height: 14px;
+	font-size: 14px;
 	color: #333;
-
+	font-weight: bold;
 	text-align: left;
+	position: relative;
+	top: 61%
 }
 
-div ul {
-	padding: 10px;
+nav ul li ul { padding: 0px 0; 
+	width: 80%;
+	position: absolute;
+	left: -370px;
+}
+nav ul li:hover ul li { 
+	display: block;
+	
+	position: relative;
+	border: 1px solid #dba500;
+	/*background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
+	background: -webkit-linear-gradient(#ffe788, #ffce38);
+	background: -moz-linear-gradient(#ffe788, #ffce38);
+	background: -o-linear-gradient(#ffe788, #ffce38);
+	background: -ms-linear-gradient(#ffe788, #ffce38);
+	background: linear-gradient(#ffe788, #ffce38);*/
 }
 
+/*
+div ul li:hover .steps{
+	display: block;
+}
+.steps ul {
+	margin: 0;
+	padding: 0;
+}
+
+.steps li {
+	display: none;
+	margin: 0;
+	padding: 0;
+	color: #d8d8d8;
+	text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
+	font-size: 18px;
+	padding-right:0px;
+}
+*/
+/*.steps a {
+	background: #395870;
+	background: linear-gradient(#49708f, #293f50);
+	border-right: lpx solid rgba(0, 0, 0, .3);
+	color: #fff;
+	padding: 12px 20px;
+	text-decoration: none;
+}
+*/
+/*
+header li {
+  color: #d8d8d8;
+  text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
+  font-size: 18px;
+  display: inline-block;
+  margin: 0 10px;
+  padding-right:0px;
+}
+
+#banner ul {
+  list-style: none;
+  height: 40px;
+  padding: 0;
+  float: left;
+  margin-left: 10px;
+}
+*/
 #banner {
   z-index: 100;
-  left: 0%;
-  top: 50px;
+  /*left: 0%;*/ /*Took out so buttons are on the right side of the screen*/
+  right: 0%;
+  top: 3%;
   height: 0%; 
   width: 10%;
   margin-right: 0px;
-  position: absolute;
+  position: relative;
   bottom: 0px;
   /*background: #ffcc00;*/ /* Take the solid color out to make it look nicer*/
   /*border: 1px solid #f0b500; */
@@ -317,11 +396,6 @@ div ul {
   padding-left: 0.5%;
   padding-right: 0.5%;
 }
-
-input, select {
-	width: 191px;
-	box-sizing: border-box;
-	}
 
 #banner .button {
   border: 1px solid #dba500;
@@ -354,7 +428,6 @@ input, select {
   position: relative;
   top: 61%
 }
-
 #banner .button:hover {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffe788));
   background: -webkit-linear-gradient(#ffe788, #ffe788);
@@ -373,24 +446,6 @@ input, select {
   line-height: 14px;
   font-size: 14px;
   background-color: #FFE788;
-}
-
-#info {
-	bottom: 20px;
-	color: #444;
-	height: auto;
-	font-family: arial;
-	left: 20px;
-	margin: 5px;
-	padding: 10px;
-	position: absolute;
-	text-align: left;
-	width: 200px;
-	z-index: 40;
-}
-.label {
-	display: inline-block;
-	width: 5em;
 }
 
 #optional {
