@@ -1,220 +1,297 @@
 //=====  Tyler Nigon  ======
 //=====  10/17/2015   ======
 
+//IP address of virtual machine where ArcGIS Services can be accessed
+var virtualMachine = "54.84.245.180"
+
 //create an ArcGIS API map
-require([
-	"esri/map",
-	"esri/toolbars/draw",
+require(["dojo/dom",
+    "dojo/_base/lang",
+    "dojo/json",
+	"dojo/on",
+    "esri/config",
+	"esri/InfoTemplate",
+    "esri/map",
+	//"esri/layers/ArcGISTiledMapServiceLayer",
     "esri/graphic",
-	"dojo/domReady!"
-	], function (
-	Map, Draw, Graphic ) {
-		map = new Map("mapDiv", {
-		//extent: new Extent(-98, -42, -91, 48),
-			center: [-93, 46.8],
-			zoom: 7,
-			basemap: "hybrid",
-			sliderStyle: "small"
+	"esri/request",
+    "esri/geometry/Geometry",
+    "esri/geometry/Extent",
+	"esri/geometry/scaleUtils",
+    "esri/SpatialReference",
+    "esri/tasks/GeometryService",
+    "esri/tasks/AreasAndLengthsParameters",
+    "esri/toolbars/draw",
+    "esri/symbols/SimpleFillSymbol",
+    "esri/symbols/SimpleLineSymbol",
+    "esri/symbols/FillSymbol",
+	"esri/renderers/SimpleRenderer",
+    "esri/Color",
+    "esri/layers/ArcGISImageServiceLayer",
+    "esri/layers/ImageServiceParameters",
+	"esri/layers/FeatureLayer",
+    "dojo/parser",
+	"dojo/sniff",
+	"dojo/_base/array",
+    "dijit/registry",
+    "dojo/domReady!"],
+function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, Geometry, Extent, scaleUtils, SpatialReference,
+    GeometryService, AreasAndLengthsParameters, Draw, SimpleFillSymbol,
+    SimpleLineSymbol, FillSymbol, SimpleRenderer, Color,
+    ArcGISImageServiceLayer, ImageServiceParameters, FeatureLayer, parser, sniff, arrayUtils,
+    registry ){
+    //identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
+    //If this null or not available the project and lengths operation will not work.  Otherwise it will do a http post to the proxy.
+    esriConfig.defaults.io.proxyUrl = "/proxy/";
+    esriConfig.defaults.io.alwaysUseProxy = false;
+    parser.parse();
+	var portalUrl = "http://www.arcgis.com"; //a place to store the imported zipped shapefile
+
+	
+	//create map
+    map = new Map("mapDiv", {
+		center: [-93.0906350,  44.669956],
+		zoom: 11,
+		basemap: "hybrid",
+		sliderStyle: "small",
 		});
-		
-		//map.on("load", createToolbar);
-		//
-		//// loop through all dijits, connect onClick event
-		//// listeners for buttons to activate drawing tools
-		//registry.forEach(function(d) {
-		//  // d is a reference to a dijit
-		//  // could be a layout container or a button
-		//  if ( draw.declaredClass === "dijit.form.Button" ) {
-		//    d.on("click", activateTool);
-		//  }
-		//});
-		//
-		//function activateTool() {
-		//  var tool = this.label.toUpperCase().replace(/ /g, "_");
-		//  toolbar.activate(Draw[tool]);
-		//  map.hideZoomSlider();
-		//}
-		//
-		//function createToolbar(themap) {
-		//  toolbar = new Draw(map);
-		//  toolbar.on("draw-end", addToMap);
-		//}
-		//
-		//function addToMap(evt) {
-		//  var symbol;
-		//  toolbar.deactivate();
-		//  map.showZoomSlider();
-		//  switch (evt.geometry.type) {
-		//    case "point":
-		//    case "multipoint":
-		//      symbol = new SimpleMarkerSymbol();
-		//      break;
-		//    case "polyline":
-		//      symbol = new SimpleLineSymbol();
-		//      break;
-		//    default:
-		//      symbol = new SimpleFillSymbol();
-		//      break;
-		//  }
-		//  var graphic = new Graphic(evt.geometry, symbol);
-		//  map.graphics.add(graphic);
-		//}
+	
+	//on load, initiate draw, getAreaAndLength, and hillshade layer
+	map.on("load", function() {
+		tb = new Draw(map);
+		tb.on("load", lang.hitch(map, getAreaAndLength))
+		tb.on("draw-end", lang.hitch(map, getAreaAndLength));
+		//Add semi-transparent hillshade topo map to aerial basemap; the following link must be changed to reflect the map I made
+		hillshade = new esri.layers.ArcGISTiledMapServiceLayer("http://" + virtualMachine.concat(":6080/arcgis/rest/services/LIDAR_basemap_mosaic/MapServer"));
+		map.addLayer(hillshade); //add hillshade layer
+		hillshade.hide();	//hide hillshade layer on first load - user can toggle it on
+		visibleToggle = "false";	//variable that will change based on visibility of hillshade
 	});
+	
+//============ Begin import .zip shapefile code ===========================
+	on(dom.byId("import-boundary"), "change", function (event) {
+		var fileName = event.target.value.toLowerCase();
+		if (sniff("ie")) { //filename is full path in IE so extract the file name
+			var arr = fileName.split("\\");
+			fileName = arr[arr.length - 1];
+		}
+		if (fileName.indexOf(".zip") !== -1) {//is file a zip - if not notify user
+			generateFeatureCollection(fileName);
+		}
+		else {
+			dom.byId('upload-status').innerHTML = '<p style="color:red">Add shapefile as .zip file</p>';
+		}
+	});
+	
+	function generateFeatureCollection (fileName) {
+		var name = fileName.split(".");
+		//Chrome and IE add c:\fakepath to the value - we need to remove it
+		//See this link for more info: http://davidwalsh.name/fakepath
+		name = name[0].replace("c:\\fakepath\\", "");
+		
+		dom.byId('upload-status').innerHTML = '<b>Loading </b>' + name;
+		
+		//Define the input params for generate see the rest doc for details
+		//http://www.arcgis.com/apidocs/rest/index.html?generate.html
+		var params = {
+		'name': name,
+		'targetSR': map.spatialReference,
+		'maxRecordCount': 1000,
+		'enforceInputFileSizeLimit': true,
+		'enforceOutputJsonSizeLimit': true
+		};
+    
+		//generalize features for display Here we generalize at 1:40,000 which is approx 10 meters
+		//This should work well when using web mercator.
+		var extent = scaleUtils.getExtentForScale(map, 40000);
+		var resolution = extent.getWidth() / map.width;
+		params.generalize = true;
+		params.maxAllowableOffset = resolution;
+		params.reducePrecision = true;
+		params.numberOfDigitsAfterDecimal = 0;
+		
+		var myContent = {
+			'filetype': 'shapefile',
+			'publishParameters': JSON.stringify(params),
+			'f': 'json',
+			'callback.html': 'textarea'
+		};
+	
+		//use the rest generate operation to generate a feature collection from the zipped shapefile
+		request({
+			url: portalUrl + '/sharing/rest/content/features/generate',
+			content: myContent,
+			form: dom.byId('import-boundary'),
+			handleAs: 'json',
+			load: lang.hitch(this, function (response) {
+				if (response.error) {
+					errorHandler(response.error);
+					return;
+				}
+				var layerName = response.featureCollection.layers[0].layerDefinition.name;
+				dom.byId('upload-status').innerHTML = '<b>Loaded: </b>' + layerName;
+				addShapefileToMap(response.featureCollection);
+			}),
+			error: lang.hitch(this, errorHandler)
+		});
+	}
+    
+	function errorHandler (error) {
+		dom.byId('upload-status').innerHTML =
+		"<p style='color:red'>" + error.message + "</p>";
+	}
+    
+	function addShapefileToMap (featureCollection) {
+		//add the shapefile to the map and zoom to the feature collection extent
+		//If you want to persist the feature collection when you reload browser you could store the collection in
+		//local storage by serializing the layer using featureLayer.toJson()  see the 'Feature Collection in Local Storage' sample
+		//for an example of how to work with local storage.
+		var fullExtent;
+		var importedLayers = [];
+    
+		arrayUtils.forEach(featureCollection.layers, function (importedLayer) {
+			var infoTemplate = new InfoTemplate("Details", "${*}");
+			var featureLayer = new FeatureLayer(importedLayer, {
+				infoTemplate: infoTemplate
+			});
+			//associate the feature with the popup on click to enable highlight and zoom to
+			featureLayer.on('click', function (event) {
+				map.infoWindow.setFeatures([event.graphic]);
+			});
+			//change default symbol if desired. Comment this out and the layer will draw with the default symbology
+			changeRenderer(featureLayer);
+			fullExtent = fullExtent ?
+			fullExtent.union(featureLayer.fullExtent) : featureLayer.fullExtent;
+			importedLayers.push(featureLayer);
+		});
+		importedLayersGraphic = map.addLayers(importedLayers);
+		visibleLayer = "true";
+		map.setExtent(fullExtent.expand(1.05), true);
+    
+		dom.byId('upload-status').innerHTML = "";
+	}
+    
+	function changeRenderer (importedLayer) {
+		//change the default symbol for the feature collection for polygons and points
+		var importSymbol = null;
+		switch (importedLayer.geometryType) {
+			case 'esriGeometryPoint':
+			importSymbol = new PictureMarkerSymbol({
+				'angle': 0,
+				'xoffset': 0,
+				'yoffset': 0,
+				'type': 'esriPMS',
+				'url': 'http://static.arcgis.com/images/Symbols/Shapes/BluePin1LargeB.png',
+				'contentType': 'image/png',
+				'width': 20,
+				'height': 20
+			});
+			break;
+			case 'esriGeometryPolygon':
+			importSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+				new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+				new Color([255,0,0]), 2), new Color([255,206,56,0.25]));
+			break;
+		}
+		if (importSymbol) {
+			importedLayer.setRenderer(new SimpleRenderer(importSymbol));
+		}
+	}
+//============ End import .zip shapefile code ===========================
 
 
-//var map = L.map('map-container')
-//var mapLocation = [44.971724, -93.24323]; //global variable; array of lat/long;
-//var timeZoneName = ''; //global variable
-//var offset = 0; //global variable
-//var rawOffset = 0; //global variable
-////var timezoneInfo = {}; //global variable
-//
-//function loadMap(){
-//	//set the initial view to 44.971724, -93.243239 and zoom level 16
-//	map.setView(mapLocation, 16);
-//	
-//	//add a basemap using the url http://{s}.tile.osm.org/{z}/{x}/{y}.png
-//	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-//		maxZoom: 18,
-//		id: 'mapbox.streets'
-//		}).addTo(map);
-//
-//	// add a box for wilson library
-//    $.getJSON("https://dl.dropboxusercontent.com/u/8550761/wilson-library.geojson", function(data) {
-//		new L.GeoJSON(data).addTo(map)
-//	// create our basemap layer and add it to the map
-//	})
-//}; //end of loadMap()
-//
-//function addGreenLine(){
-//	$.getJSON("green-line-eastbound.geojson", function(data){
-//		new L.GeoJSON(data, {
-//			style: {
-//				"color": "green"
-//			}
-//		}).addTo(map)
-//	});
-//}; //end of addGreenLine()
-//
-//function addHydrants(){
-//	$.getJSON("Hydrants_WGS84.geojson", function(data){
-//		new L.GeoJSON(data, {
-//			style: function (feature) {
-//				return {color: feature.properties.color};
-//			},
-//			onEachFeature: function (feature, layer) {
-//				layer.bindPopup(feature.properties.description);
-//			}
-//		}).addTo(map)
-//	});
-//}; //end of addHydrants()
-//
-////Add the location and current timestamp to the google API url
-//function addTimestampToURL(){
-//	var now = {timestamp:Date.now()}; //create timestamp variable to determine the timezone
-//	var timezoneAPIurl = "https://maps.googleapis.com/maps/api/timezone/json?"
-//	timezoneAPIurl += "location=" + mapLocation;
-//	var timestamp = now.timestamp
-//	var timestamp = timestamp.toString();
-//	var timestamp = timestamp.slice(0,10);
-//	timezoneAPIurl += "&timestamp=" + timestamp;
-//	//window.alert(timezoneAPIurl)
-//	return timezoneAPIurl; 
-//}; //end of addTimestampToURL()
-//
-////gets the time zone of var "mapLocation" so local time for that location is reported 
-//function getTimezone(timezoneAPIurl) {
-//	$.getJSON( timezoneAPIurl , function( data ) {
-//		offset = data.dstOffset; //global variable
-//		rawOffset = data.rawOffset; //global variable
-//		var status = data.status; //status and timeZoneID aren't used
-//		var timeZoneID = data.timeZoneID;
-//		timeZoneName = data.timeZoneName; //global variable
-//	})
-//}; //end of getTimezone()
-//
-////script that is executed when page first loads
-//$(window).load(function(){
-//	//load map
-//	loadMap();
-//	
-//	//Use JQuery to select the div with class set to red box and
-//	//Add a click handler that does something in response to a user clicking on the div
-//	$( ".red.box" ).click(function() {
-//		alert( "The red box isn't serving any purpose. Let's hide it." );
-//		$( ".box" ).hide( "slow" );
-//	});
-//
-//	//request GeoJSON from the url https://dl.dropboxusercontent.com/u/8550761/wilson-library.geojson using JQuery and
-//	//add a GeoJSON based layer to the map using the requested GeoJSON
-//	$( "#greenLine" ).click(function() {
-//		addGreenLine();
-//	})
-//	
-//	//Add Hydrants from mouseclick
-//	$( "#hydrants" ).click(function() {
-//		addHydrants();
-//	})
-//	
-//	//Load timezone info to get date/time of map being displayed
-//	timezoneAPIurl = addTimestampToURL( );
-//	getTimezone( timezoneAPIurl );
-//	
-//	//creates alert for current date/time when button is pressed.
-//	$("#dateTime").click(function(){
-//		today = getDateTime();
-//		todayTimeZone = today+' '+timeZoneName;
-//		window.alert(todayTimeZone);
-//	});
-//	
-//	//switch basemap to satellite upon button click
-//	$( "#switchBaseLayer" ).click(function() {
-//		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
-//			maxZoom: 18,
-//			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-//				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-//				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-//			id: 'mapbox.satellite'
-//		}).addTo(map);
-//	});
-//}); // end of load function
-//
-////getDateTime() takes current UTC time and applies daylight savings and dst offsets so local time is reported.
-//function getDateTime(){
-//	var today = new Date();
-//	var dd = today.getDate();
-//	var mm = today.getMonth()+1; //Janurary is 0/var yyyy = today.getFullYear();
-//	var yyyy = today.getFullYear();
-//	var hour = today.getHours();
-//	var min = today.getMinutes();
-//	var midday = "AM";
-//
-//	if(dd<10){
-//		dd='0'+dd;
-//	}
-//	
-//	if(mm<10){
-//		mm='0'+mm;
-//	}
-//	
-//	if(hour>12){
-//		hour = hour-12;
-//		midday = "PM"
-//	};
-//	
-//	if(min<10){
-//		min = '0'+min
-//	}
-//	var offsetHour = offset/3600; // get daylight savings offset in hours
-//	var rawOffsetHour= rawOffset/3600; // get dst offset in hours
-//	
-//	if(hour+offsetHour+rawOffsetHour<0) {
-//		hour = 24-(hour+offsetHour+rawOffsetHour);
-//	};
-//	today = mm+'/'+dd+'/'+yyyy+' '+(hour+offsetHour+rawOffsetHour)+':'+min+' '+midday;
-//	return today; // return string of current time for map position
-//};
-//
-//
-//
-////switchBaseLayer
+	//load the ArcGIS REST GeometryServices
+	var geometryService = new GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
+	geometryService.on("areas-and-lengths-complete", outputAreaAndLength);
+
+	function getAreaAndLength(evtObj) {
+		var map = this,
+		geometry = evtObj.geometry;
+		map.graphics.clear(); //clears any previous polygon that was drawn
+		
+		var drawSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+		new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+		new Color([255,0,0]), 2),new Color([255,206,56,0.25]))
+		
+		drawGraphic = map.graphics.add(new Graphic(geometry, drawSymbol));
+		//drawGraphicExists = 1;
+		
+		//setup the parameters for the areas and lengths operation
+		var areasAndLengthParams = new AreasAndLengthsParameters();
+		areasAndLengthParams.lengthUnit = GeometryService.UNIT_FOOT;
+		areasAndLengthParams.areaUnit = GeometryService.UNIT_ACRES;
+		areasAndLengthParams.calculationType = "geodesic";
+		geometryService.simplify([geometry], function(simplifiedGeometries) {
+			areasAndLengthParams.polygons = simplifiedGeometries;
+			geometryService.areasAndLengths(areasAndLengthParams);
+			});
+		tb.deactivate(); //deactivates draw tool after polyon is drawn
+		map.showZoomSlider();
+	}
+
+	//function to display the area and perimeter data from hand-drawn polygon
+	function outputAreaAndLength(evtObj) {
+		var result = evtObj.result;
+		console.log(json.stringify(result));
+		dom.byId("area").innerHTML = result.areas[0].toFixed(1) + " acres";
+		dom.byId("perimeter").innerHTML = result.lengths[0].toFixed(0) + " feet";
+	}
+
+	//Add a click handler that lets the user draw a polygon when clicking
+	//on the div. This is enabled via the html code: onchange:"drawPolygon(this)"
+	window.drawPolygon = function(e){
+		if(e.value=="polygon"){
+			tb.activate(Draw["POLYGON"]);
+			//Resets the "Draw Boundary" button so it displays as such again
+			var theText = "Draw Boundary";
+			$("#draw-boundary option:contains(" + theText + ")").attr('selected', 'selected');
+			}
+		else if(e.value=="freehand-polygon"){
+			tb.activate(Draw["FREEHAND_POLYGON"]);
+			//Resets the "Draw Boundary" button so it displays as such again
+			var theText = "Draw Boundary";
+			$("#draw-boundary option:contains(" + theText + ")").attr('selected', 'selected');
+		}
+	}
+
+	//Add a click handler that lets the user toggle the hillshade layer when clicking
+	//on the button. This is enabled via the html code: onchange:"toggleHillshade(this)"
+	toggleHillshade = function() {
+		if(visibleToggle == "false") {
+			hillshade.show();
+			visibleToggle = "true";
+		} else if(visibleToggle == "true") {
+			hillshade.hide();
+			visibleToggle = "false";
+		}
+	}
+	
+	//Clear existing polygon from map from clicking "Clear Boundary" button
+	$( "#clear-boundary" ).click(function() {
+		//alert( "This will remove your boundary from the map. Are you sure?" );
+		map.graphics.remove(drawGraphic);
+	});
+	
+	//Hide imported polygons from map from clicking "Toggle Imported Layer" button
+	toggleImportedLayer = function() {
+		alert (visibleLayer)
+		if(visibleLayer == "false") {
+			importedLayersGraphic.show();
+			visibleLayer = "true";
+			alert ("False")
+			//visibleToggle = "true";
+		} else if(visibleLayer == "true") {
+			importedLayersGraphic.hide();
+			visibleLayer = "false";
+			alert ("True")
+			//visibleToggle = "false";
+		}
+	}
+	
+	//show instructions/help menu for this application
+	$( "#infoIcon" ).click(function() {
+		$( "#instructionSteps" ).toggle( "fast", function() {
+		// Animation complete.
+		});
+	});
+});

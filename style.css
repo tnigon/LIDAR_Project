@@ -3,16 +3,23 @@
 functionality is there
 green color: #008A2E
 maroon color: #7a0019
+light maroon: #F2E6E8
 gold color:  #ffce38
 dark gold color: #9d7f0d
 dark charcoal: #393939
-
+light gray: #F2F2F2
 */
 
-html, body, #mapDiv { 
+html, body { 
     height: 100%; width: 100%; margin: 0; padding: 0; 
 } 
 
+#mapDiv { 
+    height: 96%; 
+	width: 100%; 
+	margin-top: 20px;
+	padding: 0; 
+} 
 /* =============================================================================
    Typography
    ========================================================================== */
@@ -167,17 +174,30 @@ header {
   right: 0;
   width: 100%;
   text-align: center;
-  background: #7a0019; /* original blue color: <url(../images/background.png) #4276b6> */
-  -moz-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  -webkit-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  -o-box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
-  box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.75);
+  border: 1px solid #F2F2F2;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #933045), color-stop(100%, #933045));
+  background: -webkit-linear-gradient(#933045, #7a0019);
+  background: -moz-linear-gradient(#933045, #7a0019);
+  background: -o-linear-gradient(#933045, #7a0019);
+  background: -ms-linear-gradient(#933045, #7a0019);
+  background: linear-gradient(#933045, #7a0019);
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -o-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  border-radius: 2px;
+  -moz-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+  background-color: #F2E6E8;
   z-index: 99;
   -webkit-font-smoothing: antialiased;
-  min-height: 76px;
+  height: 24px;
 }
 header h1 {
-  font: 40px/48px "Copse", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 20px/24px "Copse", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #f3f3f3;
   text-shadow: 0px 2px 0px #235796;
   margin: 0px;
@@ -200,59 +220,89 @@ ul	{
 	-webkit-margin-after:0em;
 }
 
-.steps ul {
-	margin: 0;
-	padding: 0;
+/* Resets */
+.instructions {
+    background: url(../LIDAR_Project/images/information_36px.png);
+	display: inline;	
+	z-index:100;
+	height: 36px;
+	width: 36px;
+	position: absolute;
+	right: 2%;
+	top: 10%;
+	margin: 0px;
+	/*TRANSITION*/
+    transition: margin 0.2s ease;
 }
 
-.steps li {
-	display: inline-block;
-	margin: 0;
-	padding: 0;
-	color: #d8d8d8;
-	text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
-	font-size: 18px;
-	padding-right:0px;
+span#inst {
+	display: none;
+	top: 16px;
+    color: #444;
+    height: auto;
+    font-family: arial;
+    right: 70%;
+    margin: 5px;
+    padding: 0px 10px 0px 10px;
+    position: absolute;
+    text-align: left;
+    width: 200px;
+    z-index: 40;
 }
 
-/*.steps a {
-	background: #395870;
-	background: linear-gradient(#49708f, #293f50);
-	border-right: lpx solid rgba(0, 0, 0, .3);
-	color: #fff;
-	padding: 12px 20px;
-	text-decoration: none;
-}
-*/
-/*
-header li {
-  color: #d8d8d8;
-  text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
-  font-size: 18px;
-  display: inline-block;
-  margin: 0 10px;
-  padding-right:0px;
+.instructions:hover #inst.esriSimpleSlider {
+	display: block;
+	margin: 0 0 0 5px;
+	line-height: 35px;
 }
 
-#banner ul {
-  list-style: none;
-  height: 40px;
-  padding: 0;
-  float: left;
-  margin-left: 10px;
+.steps {
+	position: absolute;
+    width: auto; 
+	height: auto;
+	top: 45px;
+	right: 1%;
+    display: none;
+    text-align: left;
+	background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
+	background: -webkit-linear-gradient(#ffe788, #ffce38);
+	background: -moz-linear-gradient(#ffe788, #ffce38);
+	background: -o-linear-gradient(#ffe788, #ffce38);
+	background: -ms-linear-gradient(#ffe788, #ffce38);
+	background: linear-gradient(#ffe788, #ffce38); 
+	border: 1px solid #dba500;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	-o-border-radius: 2px;
+	-ms-border-radius: 2px;
+	-khtml-border-radius: 2px;
+	border-radius: 2px;
+	-moz-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+	-webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+	-o-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+	box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
+	line-height: 20px;
+	font-size: 16px;
+	color: #333;
+
+	text-align: left;
 }
-*/
+
+div ul {
+	padding: 10px;
+}
+
 #banner {
-  z-index: 10;
-  /*left: 0%;*/ /*Took out so buttons are on the right side of the screen*/
-  right: 0%;
-  height: 100%;
-  width: 210px;
+  z-index: 100;
+  left: 0%;
+  top: 50px;
+  height: 0%; 
+  width: 10%;
   margin-right: 0px;
-  position: fixed;
+  position: absolute;
   bottom: 0px;
-  background: #ffcc00;
-  border: 1px solid #f0b500;
+  /*background: #ffcc00;*/ /* Take the solid color out to make it look nicer*/
+  /*border: 1px solid #f0b500; */
   -moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
   -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
   -o-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
@@ -266,6 +316,12 @@ header li {
   padding-left: 0.5%;
   padding-right: 0.5%;
 }
+
+
+input, select {
+	width: 191px;
+	box-sizing: border-box;
+	}
 
 #banner .button {
   border: 1px solid #dba500;
@@ -297,7 +353,28 @@ header li {
   text-align: center;
   position: relative;
   top: 61%
+  
+  overflow: hidden;
+  vertical-align: middle;
+  text-align: center;
+  cursor:pointer;
 }
+
+/*hide the ugly Choose File button */
+.button input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px 12px 4px;
+  margin-top: 6px;
+  line-height: 14px;
+  font-size: 14px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  z-index:2;
+  }
+
 #banner .button:hover {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffe788));
   background: -webkit-linear-gradient(#ffe788, #ffe788);
@@ -318,18 +395,23 @@ header li {
   background-color: #FFE788;
 }
 
-
-/*#drawBoundary .link {
-  position: loaded;
-  left: 50%;
-  margin-left: -325px;
-  padding: 10px 12px;
-  margin-top: 6px;
-  line-height: 14px;
-  font-size: 14px;
-  background-color: #FFE788;
+#info {
+	bottom: 20px;
+	color: #444;
+	height: auto;
+	font-family: arial;
+	left: 20px;
+	margin: 5px;
+	padding: 10px;
+	position: absolute;
+	text-align: left;
+	width: 200px;
+	z-index: 40;
 }
-*/
+.label {
+	display: inline-block;
+	width: 5em;
+}
 
 #optional {
 	border:solid 2px;
@@ -371,7 +453,7 @@ header li {
   }
 
   #banner {
-    width: 100%;
+    width: 28%;
   }
   #banner .downloads {
     margin-right: 60px;
@@ -419,7 +501,7 @@ header li {
   }
 
   #banner {
-    top: 80px;
+    top: 40px;
   }
   #banner .link {
     float: left;
