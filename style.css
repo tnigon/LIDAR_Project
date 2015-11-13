@@ -172,7 +172,7 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
+  width: auto;
   text-align: center;
   border: 1px solid #F2F2F2;
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #933045), color-stop(100%, #933045));
@@ -228,7 +228,7 @@ ul	{
 	height: 36px;
 	width: 36px;
 	position: absolute;
-	right: 2%;
+	right: 1%;
 	top: 10%;
 	margin: 0px;
 	/*TRANSITION*/
@@ -262,7 +262,7 @@ span#inst{
     width: auto; 
 	height: auto;
 	top: 45px;
-	right: 1%;
+	right: 0%;
     display: none;
     text-align: left;
 	background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffce38));
@@ -376,11 +376,11 @@ input, select {
 }
 
 #info {
-	bottom: 20px;
+	bottom: 0.5%;
 	color: #444;
 	height: auto;
 	font-family: arial;
-	left: 20px;
+	left: 0.25%;
 	margin: 5px;
 	padding: 10px;
 	position: absolute;

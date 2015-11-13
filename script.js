@@ -56,7 +56,7 @@ function(dom, lang, json, esriConfig, Map, Graphic, Geometry, Extent, SpatialRef
 			new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
 			new Color([255,0,0]), 2),new Color([255,206,56,0.25]))
 		
-		graphic = map.graphics.add(new Graphic(geometry, symbol));
+		//graphic = map.graphics.add(new Graphic(geometry, symbol));
 		graphicExists = 1;
 		
 		//setup the parameters for the areas and lengths operation
