@@ -232,10 +232,10 @@ ul	{
 	top: 10%;
 	margin: 0px;
 	/*TRANSITION*/
-    transition: margin 0.1s ease;
+    transition: margin 0.2s ease;
 }
 
-span#inst{
+span#inst {
 	display: none;
 	top: 16px;
     color: #444;
@@ -248,7 +248,6 @@ span#inst{
     text-align: left;
     width: 200px;
     z-index: 40;
-	
 }
 
 .instructions:hover #inst.esriSimpleSlider {
@@ -282,8 +281,8 @@ span#inst{
 	-webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
 	-o-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
 	box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.4), 0px 1px 1px rgba(0, 0, 0, 0.1);
-	line-height: 24px;
-	font-size: 18px;
+	line-height: 20px;
+	font-size: 16px;
 	color: #333;
 
 	text-align: left;
@@ -317,6 +316,7 @@ div ul {
   padding-left: 0.5%;
   padding-right: 0.5%;
 }
+
 
 input, select {
 	width: 191px;
@@ -353,7 +353,27 @@ input, select {
   text-align: center;
   position: relative;
   top: 61%
+  
+  overflow: hidden;
+  vertical-align: middle;
+  text-align: center;
+  cursor:pointer;
 }
+
+/*hide the ugly Choose File button */
+.button input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px 12px 4px;
+  margin-top: 6px;
+  line-height: 14px;
+  font-size: 14px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  z-index:2;
+  }
 
 #banner .button:hover {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe788), color-stop(100%, #ffe788));
