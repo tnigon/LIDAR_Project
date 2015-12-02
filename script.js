@@ -2,16 +2,18 @@
 //=====  10/17/2015   ======
 
 //IP address of virtual machine where ArcGIS Services can be accessed
-var virtualMachine = "54.84.245.180"
-
+var virtualMachine = "54.197.237.185"	
+	
 //create an ArcGIS API map
-require(["dojo/dom",
+require([
+	"dojo/dom",
     "dojo/_base/lang",
     "dojo/json",
 	"dojo/on",
     "esri/config",
 	"esri/InfoTemplate",
     "esri/map",
+	"application/bootstrapmap",
 	//"esri/layers/ArcGISTiledMapServiceLayer",
     "esri/graphic",
 	"esri/request",
@@ -27,6 +29,7 @@ require(["dojo/dom",
     "esri/symbols/FillSymbol",
 	"esri/renderers/SimpleRenderer",
     "esri/Color",
+	"esri/layers/layer",
     "esri/layers/ArcGISImageServiceLayer",
     "esri/layers/ImageServiceParameters",
 	"esri/layers/FeatureLayer",
@@ -35,9 +38,9 @@ require(["dojo/dom",
 	"dojo/_base/array",
     "dijit/registry",
     "dojo/domReady!"],
-function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, Geometry, Extent, scaleUtils, SpatialReference,
+function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graphic, request, Geometry, Extent, scaleUtils, SpatialReference,
     GeometryService, AreasAndLengthsParameters, Draw, SimpleFillSymbol,
-    SimpleLineSymbol, FillSymbol, SimpleRenderer, Color,
+    SimpleLineSymbol, FillSymbol, SimpleRenderer, Color, Layer,
     ArcGISImageServiceLayer, ImageServiceParameters, FeatureLayer, parser, sniff, arrayUtils,
     registry ){
     //identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
@@ -47,17 +50,27 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, G
     parser.parse();
 	var portalUrl = "http://www.arcgis.com"; //a place to store the imported zipped shapefile
 
-	
-	//create map
-    map = new Map("mapDiv", {
+
+    
+    // Get a reference to the ArcGIS Map class
+    var map = BootstrapMap.create("mapDiv",{
 		center: [-93.0906350,  44.669956],
 		zoom: 11,
 		basemap: "hybrid",
-		sliderStyle: "small",
-		});
+    });
 	
+	////create map
+    //map = new Map("mapDiv", {
+	//	center: [-93.0906350,  44.669956],
+	//	zoom: 11,
+	//	basemap: "hybrid",
+	//	sliderStyle: "small",
+	//});
+
 	//on load, initiate draw, getAreaAndLength, and hillshade layer
 	map.on("load", function() {
+		var height = $(window).height();        //Get the height of the browser window
+		$('#mapDiv').height(height - 60);  //Resize the mapDiv, with a size of 60 - page height.
 		tb = new Draw(map);
 		tb.on("load", lang.hitch(map, getAreaAndLength))
 		tb.on("draw-end", lang.hitch(map, getAreaAndLength));
@@ -89,7 +102,7 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, G
 		//See this link for more info: http://davidwalsh.name/fakepath
 		name = name[0].replace("c:\\fakepath\\", "");
 		
-		dom.byId('upload-status').innerHTML = '<b>Loading </b>' + name;
+		dom.byId('upload-status').innerHTML = '<b>Loading: </b>' + name;
 		
 		//Define the input params for generate see the rest doc for details
 		//http://www.arcgis.com/apidocs/rest/index.html?generate.html
@@ -148,7 +161,8 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, G
 		//for an example of how to work with local storage.
 		var fullExtent;
 		var importedLayers = [];
-    
+		
+		//capability to show attribute information via mouse click
 		arrayUtils.forEach(featureCollection.layers, function (importedLayer) {
 			var infoTemplate = new InfoTemplate("Details", "${*}");
 			var featureLayer = new FeatureLayer(importedLayer, {
@@ -271,21 +285,42 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, G
 		map.graphics.remove(drawGraphic);
 	});
 	
-	//Hide imported polygons from map from clicking "Toggle Imported Layer" button
-	toggleImportedLayer = function() {
-		alert (visibleLayer)
-		if(visibleLayer == "false") {
-			importedLayersGraphic.show();
-			visibleLayer = "true";
-			alert ("False")
-			//visibleToggle = "true";
-		} else if(visibleLayer == "true") {
-			importedLayersGraphic.hide();
-			visibleLayer = "false";
-			alert ("True")
-			//visibleToggle = "false";
-		}
-	}
+	////Hide imported polygons from map from clicking "Toggle Imported Layer" button
+	//function updateLayerVisibility (importedLayersGraphic) {
+	//	var inputs = query(".list_item");
+	//	var inputCount = inputs.length;
+	//	//in this application layer 2 is always on.
+	//	visibleLayerIds = [2];
+	//	
+	//	for (var i = 0; i < inputCount; i++) {
+	//		if (inputs[i].checked) {
+	//			visibleLayerIds.push(inputs[i].value);
+	//		}
+	//	}
+	//	
+	//	if (visibleLayerIds.length === 0) {
+	//		visibleLayerIds.push(-1);
+	//		}
+	//	
+	//	layer.setVisibleLayers(visibleLayerIds);
+	//}
+		  
+	//toggleImportedLayer = function() {
+	//	alert (visibleLayer)
+	//	if(visibleLayer == "false") {
+	//		//updateLayerVisibility ()
+	//		importedLayersGraphic.show();
+	//		visibleLayer = "true";
+	//		alert ("False")
+	//		//visibleToggle = "true";
+	//	} else if(visibleLayer == "true") {
+	//		//updateLayerVisibility ()
+	//		importedLayersGraphic.hide();
+	//		visibleLayer = "false";
+	//		alert ("True")
+	//		//visibleToggle = "false";
+	//	}
+	//}
 	
 	//show instructions/help menu for this application
 	$( "#infoIcon" ).click(function() {
@@ -293,4 +328,5 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, Graphic, request, G
 		// Animation complete.
 		});
 	});
+	
 });
