@@ -24,7 +24,7 @@
 		<script type="text/javascript" src="bootstrap.js"></script>
 	</head>
 	
-	<body>
+<body>
 	<div class = "header">
 		<!-- Button trigger modal -->
 		<button type="button" class="btn btn-default" data-toggle="modal" data-target="#infoModal">
@@ -68,9 +68,11 @@
 	</div>
 	
 	<div class="container-fluid">
-		<div class="row-fluid">
+		<div class="row">
 			<div class="col-md-12">
-				<div class="col-md-offset-10 col-md-2"> <!--I want the buttons to float over the map-->
+				<div class="row">
+					<div id="mapDiv"></div>
+					<div class="button-panel">
 					<div class="panel panel-success">
 						<div class="panel-heading">
 							<div class="btn-group-vertical">
@@ -156,12 +158,16 @@
 						</div>
 					</div>
 				</div>
+				</div>
+			</div>
 			
-			<div id="mapDiv">
-			</div>
-			</div>
-		</div>	
-	</div>
+				
+		</div>
+			
+		</div>
+
+	</div>	
+
 	
 </body>
 </html>

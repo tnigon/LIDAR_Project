@@ -53,7 +53,7 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graph
 
     
     // Get a reference to the ArcGIS Map class
-    var map = BootstrapMap.create("mapDiv",{
+    window.map = BootstrapMap.create("mapDiv",{
 		center: [-93.0906350,  44.669956],
 		zoom: 11,
 		basemap: "hybrid",
