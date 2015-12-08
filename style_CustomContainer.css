@@ -1,0 +1,139 @@
+/* =============================================================================
+	Custom Map Elements
+   ========================================================================== */
+html body {
+    height: 100%;
+    min-height: 100%;
+}
+
+/*.map .container{
+    max-width: 100%;
+}
+
+*/
+
+.col-md-nopad {
+	padding-left: 0px;
+	padding-right: 1px;	
+}
+
+
+.button-panel {
+    position: relative;
+    top: 3px;
+	padding: 10px;
+	margin: 5px;
+	height: 100%;
+	border: 2px solid #828282;
+	background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #F2F2F2), color-stop(100%, #F2F2F2));
+	background: -webkit-linear-gradient(#F2F2F2, #d9d9d9);
+	background: -moz-linear-gradient(#F2F2F2, #d9d9d9);
+	background: -o-linear-gradient(#F2F2F2, #d9d9d9);
+	background: -ms-linear-gradient(#F2F2F2, #d9d9d9);
+	background: linear-gradient(#F2F2F2, #d9d9d9);
+}
+
+.map-panel {
+    position: relative;
+    top: 3px;
+	padding: 0px;
+	margin-top: 3px;
+	height: 100%;
+	/* width: 99.8%; */
+	border: 2px solid #828282;
+	background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #F2F2F2), color-stop(100%, #F2F2F2));
+	background: -webkit-linear-gradient(#F2F2F2, #d9d9d9);
+	background: -moz-linear-gradient(#F2F2F2, #d9d9d9);
+	background: -o-linear-gradient(#F2F2F2, #d9d9d9);
+	background: -ms-linear-gradient(#F2F2F2, #d9d9d9);
+	background: linear-gradient(#F2F2F2, #d9d9d9);
+}
+
+.panel-success-border {
+	margin: 0px;
+}
+
+#mapDiv { 
+	/*position: relative;*/
+	height: 100%;
+	width: 100%;
+	overflow: inherit;
+	/*top: 0;*/
+	/*margin-top: 10px;*/
+	/*padding-right: 15px; */
+	z-index: 0;
+}
+
+
+.functionButton {
+	z-index: 1;
+	left: 0%;
+	top: 50px;
+	height: 0%; 
+	width: 10%;
+	margin-right: 0px;
+	position: absolute;
+	bottom: 0px;
+
+
+	/*background: #ffcc00;*/ /* Take the solid color out to make it look nicer*/
+	/*border: 1px solid #f0b500; */
+	-moz-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
+	-webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
+	-o-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
+	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
+	-moz-border-radius: 0px 2px 2px 0px;
+	-webkit-border-radius: 0px 2px 2px 0px;
+	-o-border-radius: 0px 2px 2px 0px;
+	-ms-border-radius: 0px 2px 2px 0px;
+	-khtml-border-radius: 0px 2px 2px 0px;
+	border-radius: 0px 2px 2px 0px;
+	padding-left: 0.5%;
+	padding-right: 0.5%;
+}
+
+/* For Custom dropdown select; not all of these are supported*/
+select.form-control {
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #444444;
+	text-align: center;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 13px;
+	line-height: 1.846;
+	-webkit-user-select: none;
+}
+
+/*hide the ugly Choose File button */
+.btn input {
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 10px 12px 4px;
+	margin-top: 6px;
+	line-height: 14px;
+	font-size: 14px;
+	opacity: 0;
+	filter: alpha(opacity=0);
+	z-index:2;
+	cursor: pointer;
+}
+
+/* Change font color for modal form text in body */
+.control-label {
+	color: black;
+	font-size: 16px;
+}
+
+/* Change font size of soil test values in status box*/
+#area, #perimeter, #OM, #phos {
+	font-size: 22px;
+	font-weight: bold;
+}
+
+
+/* =============================================================================
+	Custom Map Elements
+   ========================================================================== */
