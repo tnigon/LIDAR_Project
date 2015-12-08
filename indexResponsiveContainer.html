@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Soil Variability Estimation</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		
+		<link rel="stylesheet" type="text/css" href="style_Paper.css">
+		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.14/esri/css/esri.css">
+		<link rel="stylesheet" type="text/css" href="bootstrapmap.css">
+		<link rel="stylesheet" type="text/css" href="style_CustomContainer.css">
+
+		<script type="text/javascript">
+			var package_path = "http://esri.github.com/bootstrap-map-js/src/js";
+			var dojoConfig = {
+				packages: [{
+					name: "application",
+					location: package_path
+				}]
+			};
+		</script>
+		<script src="http://js.arcgis.com/3.14/"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script type="text/javascript" src="script.js"></script>	
+		<script type="text/javascript" src="bootstrap.js"></script>
+	</head>
+	
+<body>
+	<div class = "header">
+		<!-- Button trigger modal -->
+		<button type="button" class="btn btn-default" data-toggle="modal" data-target="#infoModal">
+			Instructions
+		</button>
+		
+		<!-- infoModal -->
+		<div id="infoModal" class="modal hide fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Instructions to create custom soil variability map</h4>
+					</div>
+					<div class="modal-body">
+						<p><i>Only Dakota County, Minnesota is supported at this time;</i></p>
+						<ul style="list-style: none;">
+							<li><strong>Step 1:</strong> Draw (or import) your field boundary.</li>
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Requirements if importing:</li> 
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Must be in WGS 84 Spatial Reference System;</li>
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Must include .shp, .shx, and .dbf files in a .zip (compressed) folder;</li>
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Maximum number of records allowed: 1,000;</li>
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Attributes can be viewed by clicking the features</li>
+							<br>
+							<li><strong>Step 2:</strong> Define average soil levels for that field.</li>
+							<br>
+							<li><strong>Step 3:</strong> Click "Generate Map".</li>
+							<br>
+							<li><strong>Step 4:</strong> View and/or download the map to aid in management.</li>
+							<br>
+							<li><strong>Optional:</strong> Click "Toggle Hillshade" to view a semi-transparent hillshade layer.</li>
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Hillshade is only available for Dakota County, MN up to zoom level 17 (1:4514)</li>
+						</ul>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-2 col-md-nopad">
+				<div class="button-panel">
+					<div class="panel panel-success panel-success-border">
+						<div class="panel-heading">
+							<div class="btn-group-vertical">
+								
+								<!-- Top "dropdown" button is used to draw polygon on map -->
+								<div class="col-md-12 btn btn-default">
+									<div class="col-md-offset-2">  <!-- Centers the "DRAW BOUNDARY" text -->
+										<select id="draw-boundary" class="form-control btn btn-default" onchange="drawPolygon(this)">
+											<option value="default" selected disabled hidden>Draw Boundary</option> <!-- disabled hidden hides the -->
+											<option value="polygon">Polygon</option>
+											<option value="freehand-polygon">Freehand Polygon</option>
+										</select>
+									</div>
+								</div>
+
+								<!-- 2nd button is used to clear the polygon that was drawn on map -->
+								<a id="clear-boundary" class="btn btn-default"><strong>Clear Boundary</strong></a>
+								<!-- 3rd button is used to select a file to import from local disk -->
+								<form enctype="multipart/form-data" method="post" id="import-boundary" class="btn btn-default"> <span><strong>Import Boundary</strong></span>
+									<input type="file" name="file" id="inFile" />
+								</form>
+								<!-- 4th button is used to toggle the imported data that was imported -->
+								<a id="toggle-imported-layer" class="btn btn-default" onclick="toggleImportedLayer(this)"><strong>Toggle Imported Layer</strong></a>	
+								<!-- Button trigger modal -->
+								<button type="button" class="btn btn-default" data-toggle="modal" data-target="#soilModal">
+									<strong>Soil Test Levels</strong>
+								</button>
+								
+								<!-- soil Modal -->
+								<div id="soilModal" class="modal hide fade">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+												<h5 class="modal-title">Please enter average soil test levels for the field</h5>
+											</div>
+											<div class="modal-body">
+												<!-- Form Fill Code -->
+												<form id="soilForm" class="form-horizontal" method="POST" role="form" onsubmit="close">
+													<fieldset>
+														<legend> </legend>
+														<div class="form-group">
+															<label for="organicMatter" class="col-md-3 control-label"><strong>Organic Matter</strong></label>
+															<div class="col-md-9">
+																<input type="number" class="form-control" id="organicMatter" name="organicMatter" placeholder="(%)">
+															</div>
+														</div>
+														<div class="form-group">
+														<label for="phosphorus" class="col-md-3 control-label"><strong>Phosphorus</strong></label>
+															<div class="col-md-9">
+																<input type="number" class="form-control" id="phosphorus" name="phosphorus" placeholder="(ppm)">
+															</div>
+														</div>
+														<div class="form-group">
+															<div class="col-md-4 col-md-offset-8">
+																<!-- <button type="reset" class="btn btn-default">Cancel</button> -->
+																<button type="button" id="btnSave" class="btn btn-primary">Save</button>
+																<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+																
+															</div>
+														</div>
+													</fieldset>
+												</form>
+											</div>
+											<!-- <div class="modal-footer">
+												<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+											</div> -->
+										</div>
+									</div>
+								</div>
+								<a id="generate-map" class="btn btn-default"><strong>Generate Map</strong></a>
+								
+								<button id="download-data" type="button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">
+									<strong>Download Data Layer</strong>
+								</button>	
+
+								<!-- 8th button is used to toggle a semi-transparent hillshade layer over the map -->
+								<a id="toggle-hillshade" class="btn btn-default" onclick="toggleHillshade()"><strong>Toggle Hillshade</strong></a>
+							</div><!-- end btn-group-vertical -->
+						</div>
+					</div>
+				</div>
+					
+				<div class="button-panel">
+					<!-- Information Panel -->
+					
+					<div class="panel panel-success panel-success-border">
+						<div class="panel-heading">
+							<h2 class="panel-title">Information panel</h2>
+						</div>
+						<div class="panel-body">
+							<h6> Area: <span id="area"></span> </h6> 
+							<h6> Perimeter: <span id="perimeter"></span> </h6> 
+							<h6> Organic Matter: <span id="OM"></span> </h6> 
+							<h6> Phosphorus: <span id="phos"></span> </h6> 
+							<h6> <span id="upload-status"></span> </h6>
+						</div>
+					</div>
+				</div>
+			</div>
+				<div class="col-md-10 col-md-nopad">
+					<div class="map-panel">
+						<div id="mapDiv"></div>
+					</div>
+				</div>
+		</div>
+	</div>	
+	
+</body>
+</html>
