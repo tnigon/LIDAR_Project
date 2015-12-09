@@ -68,7 +68,7 @@
 	
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-2 col-md-nopad">
+			<div class="col-md-3 col-md-nopad">
 				<div class="button-panel">
 					<div class="panel panel-success panel-success-border">
 						<div class="panel-heading">
@@ -76,7 +76,7 @@
 								
 								<!-- Top "dropdown" button is used to draw polygon on map -->
 								<div class="col-md-12 btn btn-default">
-									<div class="col-md-offset-2">  <!-- Centers the "DRAW BOUNDARY" text -->
+									<div class="col-md-offset-4">  <!-- Centers the "DRAW BOUNDARY" text -->
 										<select id="draw-boundary" class="form-control btn btn-default" onchange="drawPolygon(this)">
 											<option value="default" selected disabled hidden>Draw Boundary</option> <!-- disabled hidden hides the -->
 											<option value="polygon">Polygon</option>
@@ -168,8 +168,9 @@
 						</div>
 					</div>
 				</div>
+
 			</div>
-				<div class="col-md-10 col-md-nopad">
+				<div class="col-md-9 col-md-nopad">
 					<div class="map-panel">
 						<div id="mapDiv"></div>
 					</div>
