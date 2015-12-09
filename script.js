@@ -97,6 +97,8 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graph
 		}
 	});
 	
+	//Where is json code?
+	
 	function generateFeatureCollection (fileName) {
 		var name = fileName.split(".");
 		//Chrome and IE add c:\fakepath to the value - we need to remove it
