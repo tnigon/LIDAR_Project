@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Soil Variability Estimation</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<!-- <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no"> -->
+		<!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+		on iOS devices-->
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+		<link rel="stylesheet" href="http://js.arcgis.com/3.14/esri/css/esri.css">
+		<link rel="stylesheet" href="style.css">
+		<script src="http://js.arcgis.com/3.14/"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
+		<script type="text/javascript" src="script.js"></script>		
+	</head>
+
+	<body>
+
+	<header>
+		<h1>Predict Soil Variability in Your Fields Based on Minnesota LIDAR Data</h1>
+		<div id="infoIcon" class="instructions">
+			<span id="inst" class="esriSimpleSlider">What does this application do?</span>
+		</div>
+
+		<div id="instructionSteps" class="steps">
+			<ul style="list-style: none;">
+				<li><strong>Instructions to create custom soil variability map</strong></li>
+				<br>
+				<li><i>Only Dakota County, Minnesota is supported at this time;</i></li>
+				<br>
+				<li><strong>Step 1:</strong> Draw (or import) your field boundary.</li>
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Requirements if importing:</li> 
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Must be in WGS 84 Spatial Reference System;</li>
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Must include .shp, .shx, and .dbf files in a .zip (compressed) folder;</li>
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Maximum number of records allowed: 1,000;</li>
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Attributes can be viewed by clicking the features</li>
+				<br>
+				<li><strong>Step 2:</strong> Define average soil levels for that field.</li>
+				<br>
+				<li><strong>Step 3:</strong> Click "Generate Map".</li>
+				<br>
+				<li><strong>Step 4:</strong> View and/or download the map to aid in management.</li>
+				<br>
+				<li><strong>Optional:</strong> Click "Toggle Hillshade" to view a semi-transparent hillshade layer.</li>
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Hillshade is only available for Dakota County, MN up to zoom level 17 (1:4514)</li>
+			</ul>
+		</div>
+	</header>
+	
+	<div id="mapDiv"></div>
+
+	<div id="banner">
+		<!-- Top "dropdown" button is used to draw polygon on map -->
+		<select id="draw-boundary" class="button" onchange="drawPolygon(this)">
+			<option value="default" selected disabled hidden>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Draw Boundary</option> <!-- disabled hidden hides the -->
+			<option value="polygon">Polygon</option>
+			<option value="freehand-polygon">Freehand Polygon</option>
+		</select>
+		<!-- 2nd button is used to clear the polygon that was drawn on map -->
+		<a id="clear-boundary" class="button"><strong>Clear Boundary</strong></a>
+		<!-- 3rd button is used to select a file to import from local disk -->
+		<form enctype="multipart/form-data" method="post" id="import-boundary" class="button"> <span><strong>Import Boundary</strong></span>
+			<input type="file" name="file" id="inFile" />
+		</form>
+		<!-- 4th button is used to toggle the imported data that was imported -->
+		<a id="toggle-imported-layer" class="button" onclick="toggleImportedLayer(this)"><strong>Toggle Imported Layer</strong></a>
+		<a id="add-soil-data" class="button"><strong>Average Soil Test Levels</strong></a>
+		<a id="generate-map" class="button"><strong>Generate Map</strong></a>
+		<a id="download-data" class="button"><strong>Download Data Layer</strong></a>
+		<!-- 8th button is used to toggle a semi-transparent hillshade layer over the map -->
+		<a id="toggle-hillshade" class="button" onclick="toggleHillshade()"><strong>Toggle Hillshade</strong></a>
+	</div><!-- end banner -->
+	
+	<div id="info" class="esriSimpleSlider"><strong>Boundary Information:</strong>
+		<br>
+		<span class="label">Area:</span> <span id="area"></span>
+		<br>
+		<span class="label">Perimeter:</span> <span id="perimeter"></span>
+		<span class="label"></span> <span id="upload-status"></span>
+	</div>
+	</body>
+</html>

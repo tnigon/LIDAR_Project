@@ -57,6 +57,7 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graph
 		center: [-93.0906350,  44.669956],
 		zoom: 11,
 		basemap: "hybrid",
+		scrollWheelZoom: true
     });
 	
 	////create map
@@ -246,8 +247,8 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graph
 	function outputAreaAndLength(evtObj) {
 		var result = evtObj.result;
 		console.log(json.stringify(result));
-		dom.byId("area").innerHTML = result.areas[0].toFixed(1) + " acres";
-		dom.byId("perimeter").innerHTML = result.lengths[0].toFixed(0) + " feet";
+		dom.byId("area").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + result.areas[0].toFixed(1) + " Ac";
+		dom.byId("perimeter").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;" + result.lengths[0].toFixed(0) + " Ft";
 	}
 
 	//Add a click handler that lets the user draw a polygon when clicking
@@ -283,7 +284,25 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graph
 	$( "#clear-boundary" ).click(function() {
 		//alert( "This will remove your boundary from the map. Are you sure?" );
 		map.graphics.remove(drawGraphic);
+		var organicMatter = 0;
+		var phosphorus = 0;
+		dom.byId("area").innerHTML = "";
+		dom.byId("perimeter").innerHTML = "";
+		dom.byId("OM").innerHTML = "";
+		dom.byId("phos").innerHTML = "";
 	});
+	
+	// Enter soil test values into #soilModal, write to webpage, and close modal
+	$('#btnSave').click(function() {
+		var organicMatter = document.getElementById('organicMatter');
+		var phosphorus = document.getElementById('phosphorus');
+		dom.byId("OM").innerHTML = "&nbsp;" + organicMatter.value + "%";
+		dom.byId("phos").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;" + phosphorus.value + " ppm";
+		$('#soilModal').modal('hide');
+		//Call organicMatter.value/phosphorus.value for geoproccessing
+	});
+	
+	
 	
 	////Hide imported polygons from map from clicking "Toggle Imported Layer" button
 	//function updateLayerVisibility (importedLayersGraphic) {
