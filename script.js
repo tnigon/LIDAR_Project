@@ -82,6 +82,24 @@ function(dom, lang, json, on, esriConfig, InfoTemplate, Map, BootstrapMap, Graph
 		visibleToggle = "false";	//variable that will change based on visibility of hillshade
 	});
 	
+	
+	//$.getJSON("https://drive.google.com/file/d/0B_8rMwwtlIlsd1dCNEJIZ1VsdDA/view?usp=sharing
+	//
+	//https://dl.dropboxusercontent.com/u/8550761/wilson-library.geojson", function(data) {
+	//	new L.GeoJSON(data).addTo(map)
+	//// create our basemap layer and add it to the map
+	//})
+    //
+	//function addQuality(){
+	//$.getJSON("green-line-eastbound.geojson", function(data){
+	//	new L.GeoJSON(data, {
+	//		style: {
+	//			"color": "green"
+	//		}
+	//	}).addTo(map)
+	//});
+	//}; //end of addGreenLine()
+	
 //============ Begin import .zip shapefile code ===========================
 	on(dom.byId("import-boundary"), "change", function (event) {
 		var fileName = event.target.value.toLowerCase();
