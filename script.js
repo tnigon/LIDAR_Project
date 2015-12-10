@@ -64,8 +64,8 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	
     // Get a reference to the ArcGIS Map class
     window.map = BootstrapMap.create("mapDiv",{
-		center: [-93.0906350,  44.669956],
-		//center: [-118.198, 33.805],
+		//center: [-93.0906350,  44.669956],
+		center: [-118.198, 33.805],
 		//zoom: 11,
 		zoom: 13,
 		basemap: "hybrid",
@@ -246,6 +246,19 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 		new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
 		new Color([255,0,0]), 2),new Color([255,206,56,0.25]))
 		drawGraphic = map.graphics.add(new Graphic(geometry, drawSymbol));
+		
+		
+		//var queryTaskTouches = new QueryTask(drawGraphic); //once graphic is present, get it's query info
+		var firstGraphic = null;
+		query = new Query();
+		//firstGraphic = drawGraphic.featureSet.features[0];
+		firstGraphic = drawGraphic;
+		var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+		firstGraphic.setSymbol(symbol);
+		//firstGraphic.setInfoTemplate(infoTemplate);
+		map.graphics.add(firstGraphic);
+		query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
+		query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 		//drawGraphicExists = 1;
 		
 		//setup the parameters for the areas and lengths operation
@@ -257,7 +270,7 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 			areasAndLengthParams.polygons = simplifiedGeometries;
 			geometryService.areasAndLengths(areasAndLengthParams);
 			});
-		tb.deactivate(); //deactivates draw tool after polyon is drawn
+		tb.deactivate(); //deactivates draw tool after polygon is drawn
 		map.showZoomSlider();
 	}
 
@@ -413,111 +426,124 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
     //
     //    map.on("load", initFunctionality);
 
-	//$( "#generate-map" ).click(function() {
-	function initFunctionality(evt) {
+	$( "#generate-map" ).click(function() {
+	//function initFunctionality(evt) {
 	
-	//var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-	//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-	//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-	//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+		//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+		//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		
+		//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		//var queryTaskTouches = new QueryTask(drawGraphic);
 	
-	var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-	//var queryTaskTouches = new QueryTask(drawGraphic);
-
-	//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
-	//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
-	esriConfig.defaults.io.proxyUrl = "/proxy/";
-	esriConfig.defaults.io.alwaysUseProxy = false;
-	
-	// Query
-	var query = new Query();
-	query.returnGeometry = true;
-	//query.outFields = [ "*"
-	//"OBJECTID", "ID", "GRIDCODE" 
-	//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
-    //];
-	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
-	query.outSpatialReference = {
-		"wkid": 102100
-	};
-	
-	var infoTempContent = "POP2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
-	//Create InfoTemplate for styling the result infowindow.
-	var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
-	map.infoWindow.resize(275, 190);
-	
-	var currentClick = null;
-	
-	// Listen for map onClick event
-	//map.on("click", function(evt) {
-	//	map.graphics.clear();
-	//	map.infoWindow.hide();
-	//	currentClick = query.geometry = evt.mapPoint;
-	//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-	//	queryTask.execute(query);
-	//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-	//});
-	
-	//Instead of map.on("click.."), run as part of click "generate-map"
-	$( "#generate-map" ).click(function(evt) {
-		//map.graphics.clear();
-		var queryTaskTouches = new QueryTask(drawGraphic);
-		map.infoWindow.hide();
-		currentClick = query.geometry = evt.mapPoint;
-		query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-		queryTask.execute(query);
-		dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-	});
-	
-	var firstGraphic = null;
-	// Listen for QueryTask onComplete event
-	
-	queryTask.on("complete", function(evt) {
-		firstGraphic = evt.featureSet.features[0];
-		var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-		firstGraphic.setSymbol(symbol);
-		firstGraphic.setInfoTemplate(infoTemplate);
-	
-		map.graphics.add(firstGraphic);
-		query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
-		query.spatialRelationship = Query.SPATIAL_REL_TOUCHES;
-		queryTaskTouches.execute(query);
-		dom.byId('messages').innerHTML = "<b>2. Executing Polygon Touches Query...</b>";
-	});
-	
-	// Listen for QueryTask executecomplete event
-	queryTaskTouches.on("complete", function(evt) {
-		var fset = evt.featureSet;
-		var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
-	
-		var resultFeatures = fset.features;
-		for (var i = 0, il = resultFeatures.length; i < il; i++) {
-			var graphic = resultFeatures[i];
-			graphic.setSymbol(symbol);
-			graphic.setInfoTemplate(infoTemplate);
-			map.graphics.add(graphic);
-		}
-	
-		map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
-	
-		var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-		map.infoWindow.setContent(content);
-		map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
-	
-		dom.byId('messages').innerHTML = "";
-	});
-	
-	
-		function average(fset, att) {
-			var features = fset.features;
-			var sum = 0;
-			var featuresLength = features.length;
-			for (var x = 0; x < featuresLength; x++) {
-				sum = sum + features[x].attributes[att];
+		//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
+		//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
+		esriConfig.defaults.io.proxyUrl = "/proxy/";
+		esriConfig.defaults.io.alwaysUseProxy = false;
+		
+		// Query
+		//var query = new Query();
+		query.returnGeometry = true;
+		query.outFields = [ "*"
+		//"OBJECTID", "ID", "GRIDCODE" 
+		//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
+		];
+	//	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
+		query.outSpatialReference = {
+			"wkid": 102100
+		};
+		
+		var infoTempContent = "Pop 2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "Males = ${MALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "OBJECTID = ${OBJECTID}<br/>ID = ${ID}<br/>GRIDCODE = ${GRIDCODE}";
+		//Create InfoTemplate for styling the result infowindow.
+		var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
+		//var infoTemplate = new InfoTemplate("Block: ${GRIDCODE}", infoTempContent);
+		map.infoWindow.resize(275, 190);
+		
+		//firstGraphic.setInfoTemplate(infoTemplate); //moved here
+		
+		var currentClick = null;
+		
+		// Listen for map onClick event
+		//map.on("click", function(evt) {
+		//	map.graphics.clear();
+		//	map.infoWindow.hide();
+		//	currentClick = query.geometry = evt.mapPoint;
+		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+		//	queryTask.execute(query);
+		//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+		//});
+		
+		//Instead of map.on("click.."), run as part of click "generate-map"
+		$( "#toggle-imported-layer" ).click(function(evt) {
+			//map.graphics.clear();
+			//var queryTaskTouches = new QueryTask(drawGraphic);
+			//map.infoWindow.hide();
+			//currentClick = query.geometry = evt.mapPoint;
+			//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+			//queryTask.execute(query);
+			//dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+		
+		
+			//var firstGraphic = null;
+			// Listen for QueryTask onComplete event
+			
+			//queryTask.on("complete", function(evt) {
+				//firstGraphic = evt.featureSet.features[0];
+			//	firstGraphic = drawGraphic.featureSet.features[0];
+			//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+			//	firstGraphic.setSymbol(symbol);
+			//	//firstGraphic.setInfoTemplate(infoTemplate);
+			//
+			//	map.graphics.add(firstGraphic);
+			//	query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
+			//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+				//queryTaskTouches.execute(query);
+				queryTask.execute(query);
+				dom.byId('messages').innerHTML = "<b>2. Executing Polygon Intersects Query...</b>";
+			//});
+		
+			// Listen for QueryTask executecomplete event
+			//queryTaskTouches.on("complete", function(evt) {
+			queryTask.on("complete", function(evt) {
+				var fset = evt.featureSet;
+				var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
+			
+				var resultFeatures = fset.features;
+				for (var i = 0, il = resultFeatures.length; i < il; i++) {
+					var graphic = resultFeatures[i];
+					graphic.setSymbol(symbol);
+					graphic.setInfoTemplate(infoTemplate);
+					map.graphics.add(graphic);
+				}
+			
+				//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
+				map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
+				//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+				//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
+				//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+				//map.infoWindow.setContent(content);
+				//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
+			
+				dom.byId('messages').innerHTML = "";
+			});
+			
+			//averages all values from a featureset (multiple features)
+			function average(fset, att) {
+				var features = fset.features;
+				var sum = 0;
+				var featuresLength = features.length;
+				for (var x = 0; x < featuresLength; x++) {
+					sum = sum + features[x].attributes[att];
+				}
+				return Math.round(sum / featuresLength);
 			}
-			return Math.round(sum / featuresLength);
-		}
-	};
+		});
+	
+
+	});
 
 
     //    //var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/5");
