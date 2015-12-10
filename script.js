@@ -64,8 +64,8 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	
     // Get a reference to the ArcGIS Map class
     window.map = BootstrapMap.create("mapDiv",{
-		//center: [-93.0906350,  44.669956],
-		center: [-118.198, 33.805],
+		center: [-93.0906350,  44.669956],
+		//center: [-118.198, 33.805],
 		//zoom: 11,
 		zoom: 13,
 		basemap: "hybrid",
@@ -81,12 +81,13 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	//});
 
 	//on load, initiate draw, getAreaAndLength, and hillshade layer
-	map.on("load", initFunctionality, function() {
+	map.on("load", function() {
 		var height = $(window).height();        //Get the height of the browser window
 		$('#mapDiv').height(height - 60);  //Resize the mapDiv, with a size of 60 - page height.
 		tb = new Draw(map);
 		tb.on("load", lang.hitch(map, getAreaAndLength))
 		tb.on("draw-end", lang.hitch(map, getAreaAndLength));
+		initFunctionality();
 		//Add semi-transparent hillshade topo map to aerial basemap; the following link must be changed to reflect the map I made
 		hillshade = new esri.layers.ArcGISTiledMapServiceLayer("http://" + virtualMachine.concat(":6080/arcgis/rest/services/LIDAR_basemap_mosaic/MapServer"));
 		map.addLayer(hillshade); //add hillshade layer
@@ -412,10 +413,17 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
     //
     //    map.on("load", initFunctionality);
 
+	//$( "#generate-map" ).click(function() {
 	function initFunctionality(evt) {
-	var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-	var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
 	
+	//var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+	//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+	//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+	//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+	
+	var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+	//var queryTaskTouches = new QueryTask(drawGraphic);
+
 	//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
 	//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
 	esriConfig.defaults.io.proxyUrl = "/proxy/";
@@ -424,6 +432,10 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	// Query
 	var query = new Query();
 	query.returnGeometry = true;
+	//query.outFields = [ "*"
+	//"OBJECTID", "ID", "GRIDCODE" 
+	//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
+    //];
 	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
 	query.outSpatialReference = {
 		"wkid": 102100
@@ -437,8 +449,19 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	var currentClick = null;
 	
 	// Listen for map onClick event
-	map.on("click", function(evt) {
-		map.graphics.clear();
+	//map.on("click", function(evt) {
+	//	map.graphics.clear();
+	//	map.infoWindow.hide();
+	//	currentClick = query.geometry = evt.mapPoint;
+	//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+	//	queryTask.execute(query);
+	//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+	//});
+	
+	//Instead of map.on("click.."), run as part of click "generate-map"
+	$( "#generate-map" ).click(function(evt) {
+		//map.graphics.clear();
+		var queryTaskTouches = new QueryTask(drawGraphic);
 		map.infoWindow.hide();
 		currentClick = query.geometry = evt.mapPoint;
 		query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
@@ -469,10 +492,10 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	
 		var resultFeatures = fset.features;
 		for (var i = 0, il = resultFeatures.length; i < il; i++) {
-		var graphic = resultFeatures[i];
-		graphic.setSymbol(symbol);
-		graphic.setInfoTemplate(infoTemplate);
-		map.graphics.add(graphic);
+			var graphic = resultFeatures[i];
+			graphic.setSymbol(symbol);
+			graphic.setInfoTemplate(infoTemplate);
+			map.graphics.add(graphic);
 		}
 	
 		map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
@@ -483,18 +506,18 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	
 		dom.byId('messages').innerHTML = "";
 	});
-	}
 	
-	function average(fset, att) {
-	var features = fset.features;
-	var sum = 0;
-	var featuresLength = features.length;
-	for (var x = 0; x < featuresLength; x++) {
-		sum = sum + features[x].attributes[att];
-	}
-	return Math.round(sum / featuresLength);
-	}
-
+	
+		function average(fset, att) {
+			var features = fset.features;
+			var sum = 0;
+			var featuresLength = features.length;
+			for (var x = 0; x < featuresLength; x++) {
+				sum = sum + features[x].attributes[att];
+			}
+			return Math.round(sum / featuresLength);
+		}
+	};
 
 
     //    //var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/5");
