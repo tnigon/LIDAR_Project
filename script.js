@@ -449,12 +449,13 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 		//"OBJECTID", "ID", "GRIDCODE" 
 		//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
 		];
-		//query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
+	//	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
 		query.outSpatialReference = {
 			"wkid": 102100
 		};
 		
-		var infoTempContent = "POP2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		var infoTempContent = "Pop 2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "Males = ${MALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
 		//var infoTempContent = "OBJECTID = ${OBJECTID}<br/>ID = ${ID}<br/>GRIDCODE = ${GRIDCODE}";
 		//Create InfoTemplate for styling the result infowindow.
 		var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
@@ -521,23 +522,27 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 				//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
 				map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
 				//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-				var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + resultFeatures.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + resultFeatures.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + resultFeatures.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + resultFeatures.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-				map.infoWindow.setContent(content);
-				map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
+				//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
+				//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+				//map.infoWindow.setContent(content);
+				//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
 			
 				dom.byId('messages').innerHTML = "";
 			});
+			
+			//averages all values from a featureset (multiple features)
+			function average(fset, att) {
+				var features = fset.features;
+				var sum = 0;
+				var featuresLength = features.length;
+				for (var x = 0; x < featuresLength; x++) {
+					sum = sum + features[x].attributes[att];
+				}
+				return Math.round(sum / featuresLength);
+			}
 		});
 	
-		function average(fset, att) {
-			var features = fset.features;
-			var sum = 0;
-			var featuresLength = features.length;
-			for (var x = 0; x < featuresLength; x++) {
-				sum = sum + features[x].attributes[att];
-			}
-			return Math.round(sum / featuresLength);
-		}
+
 	});
 
 
