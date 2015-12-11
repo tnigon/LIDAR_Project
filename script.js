@@ -426,84 +426,8 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
     //
     //    map.on("load", initFunctionality);
 
-<<<<<<< HEAD
-	//$( "#generate-map" ).click(function() {
-	function initFunctionality(evt) {
-	
-	//var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-	//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-	
-	//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-	//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-	
-	var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-	//var queryTaskTouches = new QueryTask(drawGraphic);
-
-	//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
-	//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
-	esriConfig.defaults.io.proxyUrl = "/proxy/";
-	esriConfig.defaults.io.alwaysUseProxy = false;
-	
-	// Query
-	var query = new Query();
-	query.returnGeometry = true;
-	//query.outFields = [ "*"
-	//"OBJECTID", "ID", "GRIDCODE" 
-	//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
-    //];
-	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
-	query.outSpatialReference = {
-		"wkid": 102100
-	};
-	
-	var infoTempContent = "POP2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
-	//Create InfoTemplate for styling the result infowindow.
-	var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
-	map.infoWindow.resize(275, 190);
-	
-	var currentClick = null;
-	
-	// Listen for map onClick event
-	//map.on("click", function(evt) {
-	//	map.graphics.clear();
-	//	map.infoWindow.hide();
-	//	currentClick = query.geometry = evt.mapPoint;
-	//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-	//	queryTask.execute(query);
-	//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-	//});
-	
-	//Instead of map.on("click.."), run as part of click "generate-map"
-	$( "#generate-map" ).click(function() {
-		//map.graphics.clear();
-		var queryTaskTouches = new QueryTask(drawGraphic);
-		map.infoWindow.hide();
-		//currentClick = query.geometry = evt.mapPoint;
-		currentClick = query.geometry = queryTaskTouches.mapPoint;
-		query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-		queryTask.execute(query);
-		dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-	});
-	
-	var firstGraphic = null;
-	// Listen for QueryTask onComplete event
-	
-	queryTask.on("complete", function(evt) {
-		firstGraphic = evt.featureSet.features[0];
-		var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-		firstGraphic.setSymbol(symbol);
-		firstGraphic.setInfoTemplate(infoTemplate);
-	
-		map.graphics.add(firstGraphic);
-		query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
-		query.spatialRelationship = Query.SPATIAL_REL_TOUCHES;
-		queryTaskTouches.execute(query);
-		dom.byId('messages').innerHTML = "<b>2. Executing Polygon Touches Query...</b>";
-	});
-=======
 	$( "#generate-map" ).click(function() {
 	//function initFunctionality(evt) {
->>>>>>> d03a4a41fd03794d34bb1245fe93276017f3e244
 	
 		var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
 		//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
