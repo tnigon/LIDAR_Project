@@ -122,6 +122,7 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
         var homelandSecurity = new ArcGISDynamicMapServiceLayer("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/MapServer");
         map.addLayer(homelandSecurity);
         
+		//What is this?
         gp = new Geoprocessor("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/GPServer/Extract%20Data%20Task");
         gp.setOutSpatialReference({wkid:102100});
 

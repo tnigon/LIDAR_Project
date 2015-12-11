@@ -195,6 +195,61 @@
 				</div>
 		</div>
 	</div>
-	
+		
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-3 col-md-nopad">
+				<div data-dojo-type="dijit/layout/BorderContainer" 
+					data-dojo-prps="gutters:false" 
+					style="width: 100%; height: 100%;margin:0;">
+			
+				<div id="map" 
+					data-dojo-type="dijit/layout/ContentPane" 
+					data-dojo-props="region:'center'">
+					
+					<div data-dojo-type="dijit/TitlePane"  data-dojo-props="title:'Extract Data'" id="controls">
+					1.Select area of interest
+					<br>
+					<button id="polygon"
+						data-dojo-type="dijit/form/Button" 
+						data-dojo-props="iconClass:'polyIcon', showLabel:false">
+						Polygon
+					</button>
+					<button id="freehandpolygon"
+						data-dojo-type="dijit.form.Button" 
+						data-dojo-props="iconClass:'freehandIcon', showLabel:false">
+						Freehand
+					</button>
+					<br><br>
+			
+					2.Select Layers to extract data from
+					<br>
+					<input id="layer1" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
+					<label for="layer1">Incident Points</label><br>
+					<input id="layer2" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
+					<label for="layer2">Incident Lines</label><br>
+					<input id="layer3" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
+					<label for="layer3">Incident Area</label>
+					<br><br>
+			
+					3.Specify download format
+					<br>
+					<select data-dojo-type="dijit/form/ComboBox" id="formatBox">
+						<option>Shapefile - SHP - .shp</option>
+						<option>File Geodatabase - GDB - .gdb</option>
+						<option>Autodesk AutoCAD - DXF_R2007 - .dxf</option>
+						<option>Autodesk AutoCAD - DWG_R2007 - .dwg</option>
+						<option>Bentley Microstation Design (V8) - DGN_V8 - .dgn</option>            
+					</select>
+					<br><br>
+					<button id="extract" data-dojo-type="dijit/form/Button">Extract Data</button>
+					<img id="loading" src="images/loading.gif">
+					</div>  
+				</div>
+			
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
