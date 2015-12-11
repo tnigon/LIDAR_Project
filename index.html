@@ -8,7 +8,7 @@
 		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.14/esri/css/esri.css">
 		<link rel="stylesheet" type="text/css" href="bootstrapmap.css">
 		<link rel="stylesheet" type="text/css" href="style_CustomContainer.css">
-
+		
 		<script type="text/javascript">
 			var package_path = "http://esri.github.com/bootstrap-map-js/src/js";
 			var dojoConfig = {
@@ -168,7 +168,7 @@
 							<h6> <span id="upload-status"></span> </h6>
 						</div>
 					</div>
-				</div>
+				</div>		
 				
 				<div class="button-panel">
 					<!-- Query Results Panel -->
@@ -177,6 +177,20 @@
 							<h2 class="panel-title">Query Results</h2>
 						</div>
 						<div class="panel-body">
+							<div class="btn-group-vertical">	
+								<div class="col-md-12 btn btn-default">
+									<div class="col-md-offset-4">  <!-- Centers the "DRAW BOUNDARY" text -->
+										<select data-dojo-type="dijit/form/ComboBox" id="formatBox" class="form-control btn btn-default" >
+											<option>Shapefile - SHP - .shp</option> <!--  value="shpfile" -->
+											<option>File Geodatabase - GDB - .gdb</option> <!--  value="filegdb" -->
+											<option>GeoJSON - JSON - .json</option> <!--  value="geojson" -->
+										</select>
+									</div>  
+								</div>
+								<button id="extract" type="button" class="btn btn-default" onclick="extractData()">Extract Data</button> <!-- removed data-dojo-type="dijit/form/Button" -->
+								<img id="loading" src="images/loading.gif"> <!-- have to set up loading.gif -->
+							</div>
+							<br />
 							<h6>Enter a keyword to Query by:</h6>
 							<input type="text" id="stateName" value="California">
 							<input id="execute" type="button" value="Get Details">
@@ -188,68 +202,13 @@
 					</div>
 				</div>
 			</div>
-				<div class="col-md-9 col-md-nopad">
-					<div class="map-panel">
-						<div id="mapDiv"></div>
-					</div>
-				</div>
-		</div>
-	</div>
-		
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-3 col-md-nopad">
-				<div data-dojo-type="dijit/layout/BorderContainer" 
-					data-dojo-prps="gutters:false" 
-					style="width: 100%; height: 100%;margin:0;">
-			
-				<div id="map" 
-					data-dojo-type="dijit/layout/ContentPane" 
-					data-dojo-props="region:'center'">
-					
-					<div data-dojo-type="dijit/TitlePane"  data-dojo-props="title:'Extract Data'" id="controls">
-					1.Select area of interest
-					<br>
-					<button id="polygon"
-						data-dojo-type="dijit/form/Button" 
-						data-dojo-props="iconClass:'polyIcon', showLabel:false">
-						Polygon
-					</button>
-					<button id="freehandpolygon"
-						data-dojo-type="dijit.form.Button" 
-						data-dojo-props="iconClass:'freehandIcon', showLabel:false">
-						Freehand
-					</button>
-					<br><br>
-			
-					2.Select Layers to extract data from
-					<br>
-					<input id="layer1" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
-					<label for="layer1">Incident Points</label><br>
-					<input id="layer2" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
-					<label for="layer2">Incident Lines</label><br>
-					<input id="layer3" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
-					<label for="layer3">Incident Area</label>
-					<br><br>
-			
-					3.Specify download format
-					<br>
-					<select data-dojo-type="dijit/form/ComboBox" id="formatBox">
-						<option>Shapefile - SHP - .shp</option>
-						<option>File Geodatabase - GDB - .gdb</option>
-						<option>Autodesk AutoCAD - DXF_R2007 - .dxf</option>
-						<option>Autodesk AutoCAD - DWG_R2007 - .dwg</option>
-						<option>Bentley Microstation Design (V8) - DGN_V8 - .dgn</option>            
-					</select>
-					<br><br>
-					<button id="extract" data-dojo-type="dijit/form/Button">Extract Data</button>
-					<img id="loading" src="images/loading.gif">
-					</div>  
-				</div>
-			
+			<div class="col-md-9 col-md-nopad">
+				<div class="map-panel">
+					<div id="mapDiv"></div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 </body>
 </html>

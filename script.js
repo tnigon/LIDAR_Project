@@ -132,8 +132,7 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
         //registry.byId("freehandpolygon").on("click", function() {
         //  activateTool(this.id);
         //});
-        //registry.byId("extract").on("click", extractData);
-
+		
         //function initSelectionToolbar() {
         //  map.graphics.clear();
         //  selectionToolbar = new Draw(map);
@@ -154,53 +153,64 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
         //  // The draw.activate expects a string like "polygon" or "freehand_polygon".
         //  tb.activate(tool);
         //}
-        
-        function extractData(){
-          //get clip layers
-          var clipLayers = [];
-          if ( registry.byId("layer1").get("checked") ) { clipLayers.push("Incident Points"); }
-          if ( registry.byId("layer2").get("checked") ) { clipLayers.push("Incident Lines"); }
-          if ( registry.byId("layer3").get("checked") ) { clipLayers.push("Incident Areas"); }
-          if ( clipLayers.length === 0 || map.graphics.graphics.length === 0 ) {
-            alert("Select layers to extract and draw an area of interest.");
-            return;
-          }
-          var featureSet = new FeatureSet();
-          var features = [];
-          features.push(map.graphics.graphics[0]);
-          featureSet.features = features;
-
-          var params = {
-            "Layers_to_Clip": clipLayers,
-            "Area_of_Interest": featureSet,
-            "Feature_Format": registry.byId("formatBox").get("value")
-          };
-          domStyle.set(loading, "display", "inline-block");
-          gp.submitJob(params, completeCallback , statusCallback, function(error){
-            alert(error);
-            domStyle.set(loading, "display", "none");
-          });
-        }
-        function completeCallback(jobInfo){
-          if ( jobInfo.jobStatus !== "esriJobFailed" ) {
-            gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
-          }
-        }
-        function statusCallback(jobInfo) {
-          var status = jobInfo.jobStatus;
-          if ( status === "esriJobFailed" ) {
-            alert(status);
-            domStyle.set("loading", "display", "none");
-          }
-          else if (status === "esriJobSucceeded"){
-            domStyle.set("loading", "display", "none");
-          }
-        }
-        function downloadFile(outputFile){
-          map.graphics.clear();
-          var theurl = outputFile.value.url;  
-          window.location = theurl;
-        }
+		
+        //registry.byId("extract").on("click", extractData);
+		
+		//Add a click handler that downloads data. Enabled via html onclick="extractData()"
+		window.extractData = function() {
+			//get clip layers
+			var clipLayers = [];
+			//if ( registry.byId("layer1").get("checked") ) { clipLayers.push("Incident Points"); } //checkbox to exptract points
+			//if ( registry.byId("layer2").get("checked") ) { clipLayers.push("Incident Lines"); } //for lines
+			//if ( registry.byId("layer3").get("checked") ) { clipLayers.push("Incident Areas"); } //for area
+			clipLayers.push("Incident Areas"); //for area
+			if ( clipLayers.length === 0 || map.graphics.graphics.length === 0 ) {
+				alert("Select layers to extract and draw an area of interest.");
+				return;
+			}
+			var featureSet = new FeatureSet();
+			var features = [];
+			features.push(map.graphics.graphics[0]);
+			featureSet.features = features;
+			
+			var params = {
+				"Layers_to_Clip": clipLayers,
+				"Area_of_Interest": featureSet,
+				"Feature_Format": registry.byId("formatBox").get("value")
+			};
+			
+			domStyle.set(loading, "display", "inline-block");
+			gp.submitJob(params, completeCallback , statusCallback, function(error){
+				alert(error);
+				domStyle.set(loading, "display", "none");
+			});
+		}
+		
+		//when job is submitted, zip file is created and downloaded
+		function completeCallback(jobInfo){
+			if ( jobInfo.jobStatus !== "esriJobFailed" ) {
+			gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
+			}
+		}
+		
+		//alerts user if job failed
+		function statusCallback(jobInfo) {
+			var status = jobInfo.jobStatus;
+			if ( status === "esriJobFailed" ) {
+			alert(status);
+			domStyle.set("loading", "display", "none");
+			}
+			else if (status === "esriJobSucceeded"){
+			domStyle.set("loading", "display", "none");
+			}
+		}
+		
+		//subfunction - actually downloads file from url
+		function downloadFile(outputFile){
+			map.graphics.clear();
+			var theurl = outputFile.value.url;  
+			window.location = theurl;
+		}
 	  
 //============ End clip code ===========================	  
 
