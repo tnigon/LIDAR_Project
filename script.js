@@ -418,6 +418,7 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	
 	//var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
 	//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+	
 	//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
 	//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
 	
@@ -459,11 +460,12 @@ function(dom, domConstruct, json, on, parser, ready, sniff, arrayUtils, lang,
 	//});
 	
 	//Instead of map.on("click.."), run as part of click "generate-map"
-	$( "#generate-map" ).click(function(evt) {
+	$( "#generate-map" ).click(function() {
 		//map.graphics.clear();
 		var queryTaskTouches = new QueryTask(drawGraphic);
 		map.infoWindow.hide();
-		currentClick = query.geometry = evt.mapPoint;
+		//currentClick = query.geometry = evt.mapPoint;
+		currentClick = query.geometry = queryTaskTouches.mapPoint;
 		query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 		queryTask.execute(query);
 		dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
