@@ -103,119 +103,6 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 //map.on("load", initFunctionality);
 
 
-//============ Begin clip code ===========================
-
-// Prevent flash of unstyled content(FOUC).
-        domStyle.set(query("body")[0], "visibility", "visible");
-        // Specify where the location of the proxy to use to communicate with the extract GP service.
-        esriConfig.defaults.io.proxyUrl = "/proxy";
-        // Keep a reference to the loading icon DOM node.
-        var loading = dom.byId("loading");
-
-        //map = new Map("map", {
-        //  basemap: "streets",
-        //  center: [-77.026, 38.905],
-        //  zoom: 14
-        //});
-        //map.on("load", initSelectionToolbar);
-        
-        var homelandSecurity = new ArcGISDynamicMapServiceLayer("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/MapServer");
-        map.addLayer(homelandSecurity);
-        
-		//What is this?
-        gp = new Geoprocessor("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/GPServer/Extract%20Data%20Task");
-        gp.setOutSpatialReference({wkid:102100});
-
-        //registry.byId("polygon").on("click", function() {
-        //  activateTool(this.id);
-        //});
-        //registry.byId("freehandpolygon").on("click", function() {
-        //  activateTool(this.id);
-        //});
-		
-        //function initSelectionToolbar() {
-        //  map.graphics.clear();
-        //  selectionToolbar = new Draw(map);
-        //  selectionToolbar.on("draw-end", function(e) {
-        //    selectionToolbar.deactivate();
-        //    var symbol = new SimpleFillSymbol(
-        //      "solid", 
-        //      new SimpleLineSymbol("dash", new Color([255,0,0]), 2), 
-        //      new Color([255,255,0,0.25])
-        //    );
-        //    var graphic = new Graphic(e.geometry, symbol);
-        //    map.graphics.add(graphic);
-        //  });
-        //}
-
-        //function activateTool(tool) {
-        //  map.graphics.clear();
-        //  // The draw.activate expects a string like "polygon" or "freehand_polygon".
-        //  tb.activate(tool);
-        //}
-		
-        //registry.byId("extract").on("click", extractData);
-		
-		//Add a click handler that downloads data. Enabled via html onclick="extractData()"
-		window.extractData = function() {
-			//get clip layers
-			var clipLayers = [];
-			//if ( registry.byId("layer1").get("checked") ) { clipLayers.push("Incident Points"); } //checkbox to exptract points
-			//if ( registry.byId("layer2").get("checked") ) { clipLayers.push("Incident Lines"); } //for lines
-			//if ( registry.byId("layer3").get("checked") ) { clipLayers.push("Incident Areas"); } //for area
-			clipLayers.push("Incident Areas"); //for area
-			if ( clipLayers.length === 0 || map.graphics.graphics.length === 0 ) {
-				alert("Select layers to extract and draw an area of interest.");
-				return;
-			}
-			var featureSet = new FeatureSet();
-			var features = [];
-			features.push(map.graphics.graphics[0]);
-			featureSet.features = features;
-			
-			var params = {
-				"Layers_to_Clip": clipLayers,
-				"Area_of_Interest": featureSet,
-				"Feature_Format": registry.byId("formatBox").get("value")
-			};
-			
-			domStyle.set(loading, "display", "inline-block");
-			gp.submitJob(params, completeCallback , statusCallback, function(error){
-				alert(error);
-				domStyle.set(loading, "display", "none");
-			});
-		}
-		
-		//when job is submitted, zip file is created and downloaded
-		function completeCallback(jobInfo){
-			if ( jobInfo.jobStatus !== "esriJobFailed" ) {
-			gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
-			}
-		}
-		
-		//alerts user if job failed
-		function statusCallback(jobInfo) {
-			var status = jobInfo.jobStatus;
-			if ( status === "esriJobFailed" ) {
-			alert(status);
-			domStyle.set("loading", "display", "none");
-			}
-			else if (status === "esriJobSucceeded"){
-			domStyle.set("loading", "display", "none");
-			}
-		}
-		
-		//subfunction - actually downloads file from url
-		function downloadFile(outputFile){
-			map.graphics.clear();
-			var theurl = outputFile.value.url;  
-			window.location = theurl;
-		}
-	  
-//============ End clip code ===========================	  
-
-
-
 //============ Begin import .zip shapefile code ===========================
 
 	on(dom.byId("import-boundary"), "change", function (event) {
@@ -626,25 +513,27 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 		// Listen for QueryTask executecomplete event
 		//queryTaskTouches.on("complete", function(evt) {
 		queryTask.on("complete", function(evt) {
-			var fset = evt.featureSet;
+			fset = evt.featureSet; //global variable - does this create a FeatureSet() object?
 			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
 		
 			var resultFeatures = fset.features;
 			for (var i = 0, il = resultFeatures.length; i < il; i++) {
-				var graphic = resultFeatures[i];
-				graphic.setSymbol(symbol);
-				graphic.setInfoTemplate(infoTemplate);
-				map.graphics.add(graphic);
+				var qualityGraphic = resultFeatures[i]; 
+				qualityGraphic.setSymbol(symbol);
+				qualityGraphic.setInfoTemplate(infoTemplate);
+				map.graphics.add(qualityGraphic);
 			}
 		
 			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
-			map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
+			//map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
 			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
 			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
 			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
 			//map.infoWindow.setContent(content);
 			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
-		
+			
+			gp = new Geoprocessor(fset);
+			gp.setOutSpatialReference({wkid:102100}); 
 			dom.byId('messages').innerHTML = "";
 		});
 		
@@ -703,6 +592,138 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
     //      dom.byId("info").innerHTML = resultItems.join("");
     //    }
 
+//============ Begin clip code ===========================
+	
+	// Prevent flash of unstyled content(FOUC).
+	domStyle.set(query("body")[0], "visibility", "visible");
+	// Specify where the location of the proxy to use to communicate with the extract GP service.
+	esriConfig.defaults.io.proxyUrl = "/proxy";
+	// Keep a reference to the loading icon DOM node.
+	var loading = dom.byId("loading");
+	
+	//map = new Map("map", {
+	//  basemap: "streets",
+	//  center: [-77.026, 38.905],
+	//  zoom: 14
+	//});
+	//map.on("load", initSelectionToolbar);
+	
+	//This is just a sample layer
+	//var homelandSecurity = new ArcGISDynamicMapServiceLayer("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/MapServer");
+	//map.addLayer(homelandSecurity);
+	
+
+	
+	//What is this? Does it perform a generic geoprocessing task? Where params defines options?
+	//gp.submitJob(params, completeCallback , statusCallback)
+	//gp is layer to clip?
+	
+	//gp = new Geoprocessor("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/GPServer/Extract%20Data%20Task");
+	//gp = new Geoprocessor(fset);
+	//gp.setOutSpatialReference({wkid:102100}); 
+	
+	//registry.byId("polygon").on("click", function() {
+	//  activateTool(this.id);
+	//});
+	//registry.byId("freehandpolygon").on("click", function() {
+	//  activateTool(this.id);
+	//});
+	
+	//function initSelectionToolbar() {
+	//  map.graphics.clear();
+	//  selectionToolbar = new Draw(map);
+	//  selectionToolbar.on("draw-end", function(e) {
+	//    selectionToolbar.deactivate();
+	//    var symbol = new SimpleFillSymbol(
+	//      "solid", 
+	//      new SimpleLineSymbol("dash", new Color([255,0,0]), 2), 
+	//      new Color([255,255,0,0.25])
+	//    );
+	//    var graphic = new Graphic(e.geometry, symbol);
+	//    map.graphics.add(graphic);
+	//  });
+	//}
+	
+	//function activateTool(tool) {
+	//  map.graphics.clear();
+	//  // The draw.activate expects a string like "polygon" or "freehand_polygon".
+	//  tb.activate(tool);
+	//}
+	
+	//registry.byId("extract").on("click", extractData);
+	
+	//Add a click handler that downloads data. Enabled via html onclick="extractData()"
+	//document.getElementById ("extract").addEventListener ("click", extractData, false);
+	//window.extractData = function() {
+	extractData = function() {
+		//get clip layers
+		var clipLayers = [];
+		//if ( registry.byId("layer1").get("checked") ) { clipLayers.push("Incident Points"); } //checkbox to exptract points
+		//if ( registry.byId("layer2").get("checked") ) { clipLayers.push("Incident Lines"); } //for lines
+		//if ( registry.byId("layer3").get("checked") ) { clipLayers.push("Incident Areas"); } //for area
+		clipLayers.push("Incident Areas"); //clipLayers tells it to clip an area
+		
+		if ( fset.length === 0 ) {
+			alert("Where is qualityGraphic?")
+		} else { 
+			alert("#1  " + fset + "#2  " + fset.features + "#3  " + fset.features.length)
+		}
+		//map.graphics.graphics.length indicates the number of queried polygons
+		if ( clipLayers.length === 0 || map.graphics.graphics.length === 0 ) { 
+			alert("Select layers to extract and draw an area of interest.");
+			return;
+		} else {
+			//map.graphics.graphics.length is number of graphics and is 1 more than fset.features.length (likely because it includes the initial handdrawn polygon)
+			alert(clipLayers.length + "   " + map.graphics.graphics.length)
+		}
+		featureSet = new FeatureSet(); //FeatureSet is a function
+		var features = [];
+		features.push(map.graphics.graphics[0]); //[0] is probably the first hand-drawn polygon
+		featureSet.features = features; //adding hand-drawn poly to featureSet variable
+		
+		var params = {
+			"Layers_to_Clip": clipLayers, //clipLayers tells it to clip an area
+			"Area_of_Interest": featureSet, //tells it to clip based on hand-drawn geometry
+			"Feature_Format": registry.byId("formatBox").get("value")
+		};
+		
+		//submits job to zip file and download it locally
+		domStyle.set(loading, "display", "inline-block");
+		gp.submitJob(params, completeCallback , statusCallback, function(error){
+			alert(error);
+			domStyle.set(loading, "display", "none");
+		});
+	};
+	
+	//when job is submitted, zip file is created and downloaded
+	function completeCallback(jobInfo){
+		if ( jobInfo.jobStatus !== "esriJobFailed" ) {
+		gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
+		}
+	}
+	
+	//alerts user if job failed
+	function statusCallback(jobInfo) {
+		var status = jobInfo.jobStatus;
+		if ( status === "esriJobFailed" ) {
+		alert(status);
+		domStyle.set("loading", "display", "none");
+		}
+		else if (status === "esriJobSucceeded"){
+		domStyle.set("loading", "display", "none");
+		}
+	}
+	
+	//subfunction - actually downloads file from url
+	function downloadFile(outputFile){
+		map.graphics.clear();
+		var theurl = outputFile.value.url;  
+		window.location = theurl;
+	}
+	
+	//Add a click handler that downloads data. Enabled via html onclick="extractData()"
+	document.getElementById ("extract").addEventListener ("click", extractData, false);
+//============ End clip code ===========================	  
 
 
   //<body>
