@@ -358,7 +358,6 @@ function(BootstrapMap, Chart,
 		}
 	};
 	
-	document.getElementById ("draw-boundary").addEventListener ("click", drawPolygon(this), false);
 	document.getElementById ("generate-map").addEventListener ("click", clipQuality(drawGraphicGeom, utahLyr), false);
 	
 //============ End draw field boundary code ===========================
