@@ -2,141 +2,224 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+      on iOS devices-->
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
-    <title>QueryTask with query geometry from another task</title>
+    <title>Extract Data</title>
 
-    <link rel="stylesheet" href="http://js.arcgis.com/3.15/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" href="http://js.arcgis.com/3.15/esri/css/esri.css">
+    <link rel="stylesheet" href="http://js.arcgis.com/3.9/js/dojo/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css">
+    <style>
+      html, body { 
+        height: 100%; 
+        width: 100%; 
+        margin: 0; 
+        padding: 0;   
+        visibility: hidden;
+        font-family: sans-serif;
+      }
+      .claro .dijitBorderContainer-child {
+        border: none;
+      }
+      .claro .dijitBorderContainer-dijitContentPane, .claro .dijitContentPane {
+        padding: 0;
+      }
+      .claro .dijitTitlePaneContentInner {
+        line-height: 1.4em;
+      }
+      #controls {
+         position:absolute;
+         top:1em;right:1em;
+         width:auto !important;
+         height:auto !important;
+         z-index:10;
+      } 
+      #loading {
+        display: none;
+        vertical-align: middle;
+      }
+      .freehandIcon { background-image:url(./images/i_draw_freepoly.PNG); width:20px; height:20px; }
+      .polyIcon { background-image:url(./images/i_draw_poly.png); width:20px; height:20px;}
+    </style>
 
-    <script src="http://js.arcgis.com/3.15/"></script>
+    <script src="http://js.arcgis.com/3.9/"></script>
     <script>
-      var map;
+      var gp, map;
+      var selectionToolbar;
 
       require([
-        "esri/map",
-        "esri/config",
+        "esri/map", "esri/config", 
+        "esri/layers/ArcGISDynamicMapServiceLayer", 
+        "esri/tasks/Geoprocessor", "esri/tasks/FeatureSet", "esri/toolbars/draw",
+        "esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleLineSymbol",
+        "esri/graphic",
         "esri/Color",
-        "esri/tasks/QueryTask",
-        "esri/tasks/query",
-        "esri/geometry/webMercatorUtils",
-        "esri/InfoTemplate",
-        "esri/symbols/SimpleLineSymbol",
-        "esri/symbols/SimpleFillSymbol",
-
-        "dojo/dom",
+        "dojo/dom", "dojo/dom-style", "dojo/query", "dojo/parser", 
+        "dijit/registry",
+        "dijit/layout/BorderContainer", "dijit/layout/ContentPane", 
+        "dijit/TitlePane", "dijit/form/CheckBox", "dijit/form/ComboBox",
         "dojo/domReady!"
       ], function(
-        Map,
-        esriConfig,
+        Map, esriConfig,
+        ArcGISDynamicMapServiceLayer,
+        Geoprocessor, FeatureSet, Draw,
+        SimpleFillSymbol, SimpleLineSymbol,
+        Graphic,
         Color,
-        QueryTask,
-        Query,
-        webMercatorUtils,
-        InfoTemplate,
-        SimpleLineSymbol,
-        SimpleFillSymbol,
+        dom, domStyle, query, parser,
+        registry
+      ) {
+        // Create all dijits.
+        parser.parse();
 
-        dom) {
+        // Prevent flash of unstyled content(FOUC).
+        domStyle.set(query("body")[0], "visibility", "visible");
+        // Specify where the location of the proxy to use to communicate with the extract GP service.
+        esriConfig.defaults.io.proxyUrl = "/proxy";
+        // Keep a reference to the loading icon DOM node.
+        var loading = dom.byId("loading");
 
-        map = new Map("mapDiv", {
+        map = new Map("map", {
           basemap: "streets",
-          center: [-118.198, 33.805],
-          zoom: 13
+          center: [-77.026, 38.905],
+          zoom: 14
         });
+        map.on("load", initSelectionToolbar);
+        
+        var homelandSecurity = new ArcGISDynamicMapServiceLayer("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/MapServer");
+        map.addLayer(homelandSecurity);
+        
+        gp = new Geoprocessor("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/GPServer/Extract%20Data%20Task");
+        gp.setOutSpatialReference({wkid:102100});
 
-        map.on("load", initFunctionality);
+        registry.byId("polygon").on("click", function() {
+          activateTool(this.id);
+        });
+        registry.byId("freehandpolygon").on("click", function() {
+          activateTool(this.id);
+        });
+        registry.byId("extract").on("click", extractData);
 
-        function initFunctionality(evt) {
-          var queryTask = new QueryTask("https://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-          var queryTaskTouches = new QueryTask("https://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-
-          //identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
-          //If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
-          esriConfig.defaults.io.proxyUrl = "/proxy/";
-          esriConfig.defaults.io.alwaysUseProxy = false;
-
-          // Query
-          var query = new Query();
-          query.returnGeometry = true;
-          query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
-          query.outSpatialReference = {
-            "wkid": 102100
-          };
-
-          var infoTempContent = "POP2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
-          //Create InfoTemplate for styling the result infowindow.
-          var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
-          map.infoWindow.resize(275, 190);
-
-          var currentClick = null;
-
-          // Listen for map onClick event
-          map.on("click", function(evt) {
-            map.graphics.clear();
-            map.infoWindow.hide();
-            currentClick = query.geometry = evt.mapPoint;
-            query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-            queryTask.execute(query);
-            dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-          });
-
-          var firstGraphic = null;
-          // Listen for QueryTask onComplete event
-
-          queryTask.on("complete", function(evt) {
-            firstGraphic = evt.featureSet.features[0];
-            var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-            firstGraphic.setSymbol(symbol);
-            firstGraphic.setInfoTemplate(infoTemplate);
-
-            map.graphics.add(firstGraphic);
-            query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
-            query.spatialRelationship = Query.SPATIAL_REL_TOUCHES;
-            queryTaskTouches.execute(query);
-            dom.byId('messages').innerHTML = "<b>2. Executing Polygon Touches Query...</b>";
-          });
-
-          // Listen for QueryTask executecomplete event
-          queryTaskTouches.on("complete", function(evt) {
-            var fset = evt.featureSet;
-            var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
-
-            var resultFeatures = fset.features;
-            for (var i = 0, il = resultFeatures.length; i < il; i++) {
-              var graphic = resultFeatures[i];
-              graphic.setSymbol(symbol);
-              graphic.setInfoTemplate(infoTemplate);
-              map.graphics.add(graphic);
-            }
-
-            map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
-
-            var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-            map.infoWindow.setContent(content);
-            map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
-
-            dom.byId('messages').innerHTML = "";
+        function initSelectionToolbar() {
+          map.graphics.clear();
+          selectionToolbar = new Draw(map);
+          selectionToolbar.on("draw-end", function(e) {
+            selectionToolbar.deactivate();
+            var symbol = new SimpleFillSymbol(
+              "solid", 
+              new SimpleLineSymbol("dash", new Color([255,0,0]), 2), 
+              new Color([255,255,0,0.25])
+            );
+            var graphic = new Graphic(e.geometry, symbol);
+            map.graphics.add(graphic);
           });
         }
 
-        function average(fset, att) {
-          var features = fset.features;
-          var sum = 0;
-          var featuresLength = features.length;
-          for (var x = 0; x < featuresLength; x++) {
-            sum = sum + features[x].attributes[att];
+        function activateTool(tool) {
+          map.graphics.clear();
+          // The draw.activate expects a string like "polygon" or "freehand_polygon".
+          selectionToolbar.activate(tool);
+        }
+        
+        function extractData(){
+          //get clip layers
+          var clipLayers = [];
+          if ( registry.byId("layer1").get("checked") ) { clipLayers.push("Incident Points"); }
+          if ( registry.byId("layer2").get("checked") ) { clipLayers.push("Incident Lines"); }
+          if ( registry.byId("layer3").get("checked") ) { clipLayers.push("Incident Areas"); }
+          if ( clipLayers.length === 0 || map.graphics.graphics.length === 0 ) {
+            alert("Select layers to extract and draw an area of interest.");
+            return;
           }
-          return Math.round(sum / featuresLength);
-        }
+          var featureSet = new FeatureSet();
+          var features = [];
+          features.push(map.graphics.graphics[0]);
+          featureSet.features = features;
 
+          var params = {
+            "Layers_to_Clip": clipLayers,
+            "Area_of_Interest": featureSet,
+            "Feature_Format": registry.byId("formatBox").get("value")
+          };
+          domStyle.set(loading, "display", "inline-block");
+          gp.submitJob(params, completeCallback , statusCallback, function(error){
+            alert(error);
+            domStyle.set(loading, "display", "none");
+          });
+        }
+        function completeCallback(jobInfo){
+          if ( jobInfo.jobStatus !== "esriJobFailed" ) {
+            gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
+          }
+        }
+        function statusCallback(jobInfo) {
+          var status = jobInfo.jobStatus;
+          if ( status === "esriJobFailed" ) {
+            alert(status);
+            domStyle.set("loading", "display", "none");
+          }
+          else if (status === "esriJobSucceeded"){
+            domStyle.set("loading", "display", "none");
+          }
+        }
+        function downloadFile(outputFile){
+          map.graphics.clear();
+          var theurl = outputFile.value.url;  
+          window.location = theurl;
+        }
       });
     </script>
   </head>
-
   <body class="claro">
-    Click on map to select census block group that intersects the map click and all block groups that touch selected group.
-    <div id="mapDiv" style="width: 100%; height:80%; position:relative;"></div>
-    <span id="messages"></span>
+    <div data-dojo-type="dijit/layout/BorderContainer" 
+         data-dojo-prps="gutters:false" 
+         style="width: 100%; height: 100%;margin:0;">
+
+      <div id="map" 
+           data-dojo-type="dijit/layout/ContentPane" 
+           data-dojo-props="region:'center'">
+           
+        <div data-dojo-type="dijit/TitlePane"  data-dojo-props="title:'Extract Data'" id="controls">
+          1.Select area of interest
+          <br>
+          <button id="polygon"
+            data-dojo-type="dijit/form/Button" 
+            data-dojo-props="iconClass:'polyIcon', showLabel:false">
+              Polygon
+          </button>
+          <button id="freehandpolygon"
+            data-dojo-type="dijit.form.Button" 
+            data-dojo-props="iconClass:'freehandIcon', showLabel:false">
+              Freehand
+          </button>
+          <br><br>
+
+          2.Select Layers to extract data from
+          <br>
+          <input id="layer1" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
+          <label for="layer1">Incident Points</label><br>
+          <input id="layer2" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
+          <label for="layer2">Incident Lines</label><br>
+          <input id="layer3" data-dojo-type="dijit/form/CheckBox" checked="checked" type="checkbox"/>
+          <label for="layer3">Incident Area</label>
+          <br><br>
+
+          3.Specify download format
+          <br>
+          <select data-dojo-type="dijit/form/ComboBox" id="formatBox">
+            <option>Shapefile - SHP - .shp</option>
+            <option>File Geodatabase - GDB - .gdb</option>
+            <option>Autodesk AutoCAD - DXF_R2007 - .dxf</option>
+            <option>Autodesk AutoCAD - DWG_R2007 - .dwg</option>
+            <option>Bentley Microstation Design (V8) - DGN_V8 - .dgn</option>            
+          </select>
+          <br><br>
+          <button id="extract" data-dojo-type="dijit/form/Button">Extract Data</button>
+          <img id="loading" src="images/loading.gif">
+        </div>  
+      </div>
+   
+     </div>
   </body>
+
 </html>

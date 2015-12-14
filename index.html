@@ -8,7 +8,7 @@
 		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.14/esri/css/esri.css">
 		<link rel="stylesheet" type="text/css" href="bootstrapmap.css">
 		<link rel="stylesheet" type="text/css" href="style_CustomContainer.css">
-
+		
 		<script type="text/javascript">
 			var package_path = "http://esri.github.com/bootstrap-map-js/src/js";
 			var dojoConfig = {
@@ -20,7 +20,7 @@
 		</script>
 		<script src="http://js.arcgis.com/3.14/"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-		<script type="text/javascript" src="script.js"></script>	
+		<script type="text/javascript" src="script2.js"></script>	
 		<script type="text/javascript" src="bootstrap.js"></script>
 	</head>
 	
@@ -168,7 +168,7 @@
 							<h6> <span id="upload-status"></span> </h6>
 						</div>
 					</div>
-				</div>
+				</div>		
 				
 				<div class="button-panel">
 					<!-- Query Results Panel -->
@@ -177,6 +177,20 @@
 							<h2 class="panel-title">Query Results</h2>
 						</div>
 						<div class="panel-body">
+							<div class="btn-group-vertical">	
+								<div class="col-md-12 btn btn-default">
+									<div class="col-md-offset-4">  <!-- Centers the "DRAW BOUNDARY" text -->
+										<select data-dojo-type="dijit/form/ComboBox" id="formatBox" class="form-control btn btn-default" >
+											<option>Shapefile - SHP - .shp</option> <!--  value="shpfile" -->
+											<option>File Geodatabase - GDB - .gdb</option> <!--  value="filegdb" -->
+											<!-- <option>GeoJSON - JSON - .json</option> <!--  value="geojson" -->
+										</select>
+									</div>  
+								</div>
+								<button id="extract" type="button" class="btn btn-default">Extract Data</button> <!-- removed data-dojo-type="dijit/form/Button" -->
+								<img id="loading" src="images/loading.gif"> <!-- have to set up loading.gif -->
+							</div>
+							<br />
 							<h6>Enter a keyword to Query by:</h6>
 							<input type="text" id="stateName" value="California">
 							<input id="execute" type="button" value="Get Details">
@@ -188,13 +202,13 @@
 					</div>
 				</div>
 			</div>
-				<div class="col-md-9 col-md-nopad">
-					<div class="map-panel">
-						<div id="mapDiv"></div>
-					</div>
+			<div class="col-md-9 col-md-nopad">
+				<div class="map-panel">
+					<div id="mapDiv"></div>
 				</div>
+			</div>
 		</div>
 	</div>
-	
+
 </body>
 </html>
