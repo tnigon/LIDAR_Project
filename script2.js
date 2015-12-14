@@ -464,7 +464,7 @@ function(BootstrapMap, Chart,
 	landLyr.setRenderer(pvtRenderer);
 	map.addLayers([utahLyr, landLyr]);
 	//map.addLayers(landLyr);
-	drawGraphic = map.graphics.add(new Graphic(drawGraphicGeom, drawSymbol));
+	//drawGraphic = map.graphics.add(new Graphic(drawGraphicGeom, drawSymbol));
 	//Layer symbology    
 	var buffSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 1]), 3), null);
 	var buffSymFade = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 0.4]), 10), null);
