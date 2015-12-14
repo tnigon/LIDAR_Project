@@ -278,6 +278,31 @@ function(BootstrapMap, Chart,
 		//	generateChart(privateLand, publicLand);
 		//}
 		
+		//Get part of drawGraphicGeom within Dakota County
+		var within = geometryEngine.within(drawGraphicGeom, utahLyr.graphics[0].geometry);
+		//check if drawGraphicGeom overlaps Dakota County
+		var overlaps = geometryEngine.overlaps(drawGraphicGeom, utahLyr.graphics[0].geometry);
+		if(!within && overlaps){
+			//If field boundary overlaps Dakota County, then adjust drawGraphic to only the portion within Dakota County  
+			drawGraphicGeom = geometryEngine.intersect(drawGraphicGeom, utahLyr.graphics[0].geometry);
+		}
+		if(!within && !overlaps){
+			//If field boundary is completely outside Dakota County, then warn the user
+			console.log("outside of utah!");
+			alert("Please choose an area within Dakota County, MN");
+			return;
+		}
+		//finally, clip Quality layer based on drawGraphicGeom
+		utahLyrGeom = geometryEngine.intersect(utahLyr.graphics[0].geometry, drawGraphicGeom);
+	
+		//generateChart() adds graphic to map, so no need to do it here;
+		//utahGraphic = map.graphics.add(new Graphic(utahLyrGeom, drawSymbol));
+		
+		//then generate statistics and make chart
+		var privateLand = getPrivateLand(utahLyrGeom);
+		var publicLand = getPublicLand(utahLyrGeom, privateLand.geom);
+		generateChart(privateLand, publicLand);
+		
 		var queryTaskTouches = new QueryTask(drawGraphic); //once graphic is present, get it's query info
 		var firstGraphic = null;
 		query = new Query();
@@ -493,32 +518,32 @@ function(BootstrapMap, Chart,
 	//	}
 	//}
 	
-	function clipQuality() {
-		//Get part of drawGraphicGeom within Dakota County
-		var within = geometryEngine.within(drawGraphicGeom, utahLyr.graphics[0].geometry);
-		//check if drawGraphicGeom overlaps Dakota County
-		var overlaps = geometryEngine.overlaps(drawGraphicGeom, utahLyr.graphics[0].geometry);
-		if(!within && overlaps){
-			//If field boundary overlaps Dakota County, then adjust drawGraphic to only the portion within Dakota County  
-			drawGraphicGeom = geometryEngine.intersect(drawGraphicGeom, utahLyr.graphics[0].geometry);
-		}
-		if(!within && !overlaps){
-			//If field boundary is completely outside Dakota County, then warn the user
-			console.log("outside of utah!");
-			alert("Please choose an area within Dakota County, MN");
-			return;
-		}
-		//finally, clip Quality layer based on drawGraphicGeom
-		utahLyrGeom = geometryEngine.intersect(utahLyr.graphics[0].geometry, drawGraphicGeom);
-	
-		//generateChart() adds graphic to map, so no need to do it here;
-		//utahGraphic = map.graphics.add(new Graphic(utahLyrGeom, drawSymbol));
-		
-		//then generate statistics and make chart
-		var privateLand = getPrivateLand(utahLyrGeom);
-		var publicLand = getPublicLand(utahLyrGeom, privateLand.geom);
-		generateChart(privateLand, publicLand);
-	}
+	//function clipQuality() {
+	//	//Get part of drawGraphicGeom within Dakota County
+	//	var within = geometryEngine.within(drawGraphicGeom, utahLyr.graphics[0].geometry);
+	//	//check if drawGraphicGeom overlaps Dakota County
+	//	var overlaps = geometryEngine.overlaps(drawGraphicGeom, utahLyr.graphics[0].geometry);
+	//	if(!within && overlaps){
+	//		//If field boundary overlaps Dakota County, then adjust drawGraphic to only the portion within Dakota County  
+	//		drawGraphicGeom = geometryEngine.intersect(drawGraphicGeom, utahLyr.graphics[0].geometry);
+	//	}
+	//	if(!within && !overlaps){
+	//		//If field boundary is completely outside Dakota County, then warn the user
+	//		console.log("outside of utah!");
+	//		alert("Please choose an area within Dakota County, MN");
+	//		return;
+	//	}
+	//	//finally, clip Quality layer based on drawGraphicGeom
+	//	utahLyrGeom = geometryEngine.intersect(utahLyr.graphics[0].geometry, drawGraphicGeom);
+	//
+	//	//generateChart() adds graphic to map, so no need to do it here;
+	//	//utahGraphic = map.graphics.add(new Graphic(utahLyrGeom, drawSymbol));
+	//	
+	//	//then generate statistics and make chart
+	//	var privateLand = getPrivateLand(utahLyrGeom);
+	//	var publicLand = getPublicLand(utahLyrGeom, privateLand.geom);
+	//	generateChart(privateLand, publicLand);
+	//}
 	
 	function getPrivateLand(geom){
 		var privateLandGraphics = landLyr.graphics;
