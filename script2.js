@@ -28,8 +28,8 @@ require([
 	"esri/layers/layer", "esri/layers/ArcGISDynamicMapServiceLayer",
     "esri/layers/ArcGISImageServiceLayer", "esri/layers/ImageServiceParameters",
 	"esri/layers/FeatureLayer", 
-	//"dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
-	//"dijit/TitlePane", "dijit/form/CheckBox", "dijit/form/ComboBox",
+	"dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+	"dijit/TitlePane", "dijit/form/CheckBox", "dijit/form/ComboBox",
     "dojo/domReady!"],
 function(BootstrapMap, Chart,
 	dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arrayUtils, lang,
@@ -388,12 +388,12 @@ function(BootstrapMap, Chart,
 	var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
 	var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
 	landLyr = new FeatureLayer(landUrl, {
-	opacity: 0.3,
+	opacity: 0.7,
 	definitionExpression: "STATE_LGD = 'Private'"
 	});
 	utahLyr = new FeatureLayer(statesUrl, {
 	definitionExpression: "STATE_NAME = 'Utah'",
-	opacity: 0
+	opacity: 1
 	});
 	
 	var pvtRenderer = new SimpleRenderer(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color("black"), 0), new Color([211,222,4,1])));
