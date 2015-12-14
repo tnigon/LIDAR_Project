@@ -8,7 +8,7 @@ var selectionToolbar;
 	
 //create an ArcGIS API map
 require([
-	"application/bootstrapmap", "./Chart-js/Chart.js",
+	"application/bootstrapmap", 
 	"dojo/dom", "dojo/dom-construct", "dojo/dom-style", "dojo/json", "dojo/on", 
 	"dojo/parser",  "dojo/query", 	"dojo/ready", "dojo/sniff", "dojo/_base/array",
 	"dojo/_base/lang",
@@ -31,7 +31,7 @@ require([
 	"dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
 	"dijit/TitlePane", "dijit/form/CheckBox", "dijit/form/ComboBox",
     "dojo/domReady!"],
-function(BootstrapMap, Chart,
+function(BootstrapMap, 
 	dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arrayUtils, lang,
 	//end of dojo
 	
@@ -388,233 +388,233 @@ function(BootstrapMap, Chart,
 //============ End toggle imported layer code ===========================
 
 //============ Begin Utah Clip code =============================
-	var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
-	var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
-	landLyr = new FeatureLayer(landUrl, {
-	opacity: 0.7,
-	definitionExpression: "STATE_LGD = 'Private'"
-	});
-	utahLyr = new FeatureLayer(statesUrl, {
-	definitionExpression: "STATE_NAME = 'Utah'",
-	opacity: 1
-	});
-	
-	var pvtRenderer = new SimpleRenderer(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color("black"), 0), new Color([211,222,4,1])));
-	landLyr.setRenderer(pvtRenderer);
-	map.addLayers([utahLyr, landLyr]);
-	
-	//Layer symbology    
-	var buffSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 1]), 3), null);
-	var buffSymFade = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 0.4]), 10), null);
-	var privateSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([138, 138, 138, 0.7]));
-	var publicSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([161, 255, 156, 0.7]));
-	var update = 0;
-	//map event handlers  
-	on(map, "click", createBuffer);
-	on(map, "mouse-drag", createBuffer);
-	on(map, "update-end", function(){
-	update++;
-	if(update === 1){
-		var fakeEvt = {};
-		fakeEvt.mapPoint = map.extent.getCenter();
-		createBuffer(fakeEvt);  
-	}
-	});
-	var drawPolygon = new Draw(map, { showTooltips: true });    
-	
-	function createBuffer(evt){
-		if(buffOpt.checked){
-			map.graphics.clear();
-			var centerPt = evt.mapPoint;
-			//Get buffer of map click point
-			buffGeom = geometryEngine.geodesicBuffer(centerPt, 10, "miles");
-			//check if buffer is completely within Utah
-			var within = geometryEngine.within(buffGeom, utahLyr.graphics[0].geometry);
-			//check if buffer overlaps Utah    
-			var overlaps = geometryEngine.overlaps(buffGeom, utahLyr.graphics[0].geometry);
-		
-			if(!within && overlaps){
-			//If buffer overlaps Utah, then only get the portion within Utah  
-			buffGeom = geometryEngine.intersect(buffGeom, utahLyr.graphics[0].geometry);
-			}
-			if(!within && !overlaps){
-			//If buffer is completely outside Utah, then warn the user
-			console.log("outside of utah!");          
-			return;
-			} 
-			map.graphics.add(new Graphic(buffGeom, buffSymFade));
-		
-			var privateLand = getPrivateLand(buffGeom);
-			var publicLand = getPublicLand(buffGeom, privateLand.geom);
-			generateChart(privateLand, publicLand);   
-		} else if(drawOpt.checked){
-		//if(drawOpt.checked){
-			map.graphics.clear();
-		}
-		else{
-			return;
-		}
-	}
-	
-	function getPrivateLand(geom){
-	var privateLandGraphics = landLyr.graphics;
-	var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
-	//Only work with private land that intersects the buffer (essentially a select by location)  
-	var priInBuffer = array.filter(privateLandGeoms, function(item, i){
-		if(geometryEngine.intersects(item, geom)){
-		return item;
-		}
-	});
-	if (priInBuffer.length > 0){
-		//merge all the private land features that intersects buffer into one feature
-		var privateUnion = geometryEngine.union(priInBuffer);
-		//get intersection of buffer and merge (cookie cutter)
-		var privateIntersect = geometryEngine.intersect(privateUnion, geom);
-		return {
-		geom: privateIntersect,
-		area: calcArea(privateIntersect)  //get the area of the private land
-		}  
-	}
-	else{
-		return {
-		geom: null,
-		area: 0
-		}
-	} 
-	}
-	
-	function getPublicLand(buffer, privateLand){
-	if(privateLand){
-		//most land that isn't private is public (city, county, state, or federally owned)     
-		var publicLand = geometryEngine.difference(buffer, privateLand);
-		return {
-		geom: publicLand,
-		area: calcArea(publicLand)
-		}  
-	} else {
-		return {
-		geom: buffer,
-		area: calcArea(buffer)
-		}
-	}
-	}
-	
-	function calcArea(geom){
-	return (Math.round(geometryEngine.geodesicArea(geom, "square-miles")*100) / 100);
-	}
-	
-	function generateChart(pvtData, pubData){
-	if(pvtData.geom)
-		map.graphics.add(new Graphic(pvtData.geom, privateSym));
-	if(pubData.geom)
-		map.graphics.add(new Graphic(pubData.geom, publicSym));
-	if(!drawOpt.checked)
-		map.graphics.add(new Graphic(buffGeom, buffSym));
-	if(!pieChart){
-		var data = [
-		{
-		label: "Private (sq mi)",
-		value: pvtData.area,
-		color: "#8A8A8A",
-		highlight: "#B5B5B5"
-		},
-		{
-		label: "Government (sq mi)",
-		value: pubData.area,
-		color: "#99F095",
-		highlight: "#A1FF9C"  
-		}
-	];
-		
-	var opts = {
-	segmentShowStroke : true,
-	segmentStrokeColor : "#fff",
-	segmentStrokeWidth : 2,
-	percentageInnerCutout : 0,
-	animationSteps : 100,
-	animationEasing : "easeOutBounce",
-	animateRotate : true,
-	animateScale : false 
-	};
-	
-	var ctx = document.getElementById("myChart").getContext("2d");
-	pieChart = new Chart(ctx).Pie(data, opts);
-	pvtPer.innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";   
-	pubPer.innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";    
-	}
-	else{
-		//update private land data
-		pieChart.segments[0].value = pvtData.area;
-		pvtPer.innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
-		//update public land data
-		pieChart.segments[1].value = pubData.area;
-		pubPer.innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";
-		pieChart.update();
-	}
-	}
-	
-	var buffOpt = dom.byId("buffOpt");
-	var navOpt = dom.byId("navOpt");
-	var drawOpt = dom.byId("drawOpt");
-	var pvtPer = dom.byId("privatePer");
-	var pubPer = dom.byId("publicPer");
-	
-	on(buffOpt, "click", function(evt){
-	if(buffOpt.checked){
-		map.disableMapNavigation();
-		drawPolygon.deactivate();
-	}
-	});
-	
-	on(navOpt, "click", function(evt){
-	if(navOpt.checked){
-		map.enableMapNavigation();
-		drawPolygon.deactivate();
-	}
-	});
-	
-	on(drawOpt, "click", function(evt){
-	if(drawOpt.checked){
-		drawPolygon.activate(Draw.POLYGON);
-	}
-	});  
-	
-	on(drawPolygon, "draw-end", function(evt){  
-	drawPolygon.deactivate();
-	drawPolygon.activate(Draw.POLYGON);
-	var geom = evt.geometry;
-	if(geom.rings[0].length <= 3){
-		alert("Polygon must have at least three vertices.");
-		return;
-	}
-		
-	var within = geometryEngine.within(geom, utahLyr.graphics[0].geometry);
-	//check if buffer overlaps Utah    
-	var overlaps = geometryEngine.overlaps(geom, utahLyr.graphics[0].geometry);
-	if(!within && overlaps){
-		//If buffer overlaps Utah, then only get the portion within Utah  
-		geom = geometryEngine.intersect(geom, utahLyr.graphics[0].geometry);
-	}
-	if(!within && !overlaps){
-		//If buffer is completely outside Utah, then warn the user
-		console.log("outside of utah!");          
-		return;
-	}  
-	var privateLand = getPrivateLand(geom);
-	var publicLand = getPublicLand(geom, privateLand.geom);
-	generateChart(privateLand, publicLand);
-	});  
-	
-	var loading = dom.byId("loadingImg");    
-	function showLoading() {
-	esri.show(loading);
-	}
-	
-	function hideLoading(error) {
-	esri.hide(loading);
-	}
-	hideLoading();
-	//on(map, "update-end", hideLoading);    
+//	var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
+//	var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
+//	landLyr = new FeatureLayer(landUrl, {
+//	opacity: 0.7,
+//	definitionExpression: "STATE_LGD = 'Private'"
+//	});
+//	utahLyr = new FeatureLayer(statesUrl, {
+//	definitionExpression: "STATE_NAME = 'Utah'",
+//	opacity: 1
+//	});
+//	
+//	var pvtRenderer = new SimpleRenderer(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color("black"), 0), new Color([211,222,4,1])));
+//	landLyr.setRenderer(pvtRenderer);
+//	map.addLayers([utahLyr, landLyr]);
+//	
+//	//Layer symbology    
+//	var buffSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 1]), 3), null);
+//	var buffSymFade = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 0.4]), 10), null);
+//	var privateSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([138, 138, 138, 0.7]));
+//	var publicSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([161, 255, 156, 0.7]));
+//	var update = 0;
+//	//map event handlers  
+//	on(map, "click", createBuffer);
+//	on(map, "mouse-drag", createBuffer);
+//	on(map, "update-end", function(){
+//	update++;
+//	if(update === 1){
+//		var fakeEvt = {};
+//		fakeEvt.mapPoint = map.extent.getCenter();
+//		createBuffer(fakeEvt);  
+//	}
+//	});
+//	var drawPolygon = new Draw(map, { showTooltips: true });    
+//	
+//	function createBuffer(evt){
+//		if(buffOpt.checked){
+//			map.graphics.clear();
+//			var centerPt = evt.mapPoint;
+//			//Get buffer of map click point
+//			buffGeom = geometryEngine.geodesicBuffer(centerPt, 10, "miles");
+//			//check if buffer is completely within Utah
+//			var within = geometryEngine.within(buffGeom, utahLyr.graphics[0].geometry);
+//			//check if buffer overlaps Utah    
+//			var overlaps = geometryEngine.overlaps(buffGeom, utahLyr.graphics[0].geometry);
+//		
+//			if(!within && overlaps){
+//			//If buffer overlaps Utah, then only get the portion within Utah  
+//			buffGeom = geometryEngine.intersect(buffGeom, utahLyr.graphics[0].geometry);
+//			}
+//			if(!within && !overlaps){
+//			//If buffer is completely outside Utah, then warn the user
+//			console.log("outside of utah!");          
+//			return;
+//			} 
+//			map.graphics.add(new Graphic(buffGeom, buffSymFade));
+//		
+//			var privateLand = getPrivateLand(buffGeom);
+//			var publicLand = getPublicLand(buffGeom, privateLand.geom);
+//			generateChart(privateLand, publicLand);   
+//		} else if(drawOpt.checked){
+//		//if(drawOpt.checked){
+//			map.graphics.clear();
+//		}
+//		else{
+//			return;
+//		}
+//	}
+//	
+//	function getPrivateLand(geom){
+//	var privateLandGraphics = landLyr.graphics;
+//	var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
+//	//Only work with private land that intersects the buffer (essentially a select by location)  
+//	var priInBuffer = array.filter(privateLandGeoms, function(item, i){
+//		if(geometryEngine.intersects(item, geom)){
+//		return item;
+//		}
+//	});
+//	if (priInBuffer.length > 0){
+//		//merge all the private land features that intersects buffer into one feature
+//		var privateUnion = geometryEngine.union(priInBuffer);
+//		//get intersection of buffer and merge (cookie cutter)
+//		var privateIntersect = geometryEngine.intersect(privateUnion, geom);
+//		return {
+//		geom: privateIntersect,
+//		area: calcArea(privateIntersect)  //get the area of the private land
+//		}  
+//	}
+//	else{
+//		return {
+//		geom: null,
+//		area: 0
+//		}
+//	} 
+//	}
+//	
+//	function getPublicLand(buffer, privateLand){
+//	if(privateLand){
+//		//most land that isn't private is public (city, county, state, or federally owned)     
+//		var publicLand = geometryEngine.difference(buffer, privateLand);
+//		return {
+//		geom: publicLand,
+//		area: calcArea(publicLand)
+//		}  
+//	} else {
+//		return {
+//		geom: buffer,
+//		area: calcArea(buffer)
+//		}
+//	}
+//	}
+//	
+//	function calcArea(geom){
+//	return (Math.round(geometryEngine.geodesicArea(geom, "square-miles")*100) / 100);
+//	}
+//	
+//	function generateChart(pvtData, pubData){
+//	if(pvtData.geom)
+//		map.graphics.add(new Graphic(pvtData.geom, privateSym));
+//	if(pubData.geom)
+//		map.graphics.add(new Graphic(pubData.geom, publicSym));
+//	if(!drawOpt.checked)
+//		map.graphics.add(new Graphic(buffGeom, buffSym));
+//	if(!pieChart){
+//		var data = [
+//		{
+//		label: "Private (sq mi)",
+//		value: pvtData.area,
+//		color: "#8A8A8A",
+//		highlight: "#B5B5B5"
+//		},
+//		{
+//		label: "Government (sq mi)",
+//		value: pubData.area,
+//		color: "#99F095",
+//		highlight: "#A1FF9C"  
+//		}
+//	];
+//		
+//	var opts = {
+//	segmentShowStroke : true,
+//	segmentStrokeColor : "#fff",
+//	segmentStrokeWidth : 2,
+//	percentageInnerCutout : 0,
+//	animationSteps : 100,
+//	animationEasing : "easeOutBounce",
+//	animateRotate : true,
+//	animateScale : false 
+//	};
+//	
+//	var ctx = document.getElementById("myChart").getContext("2d");
+//	pieChart = new Chart(ctx).Pie(data, opts);
+//	pvtPer.innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";   
+//	pubPer.innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";    
+//	}
+//	else{
+//		//update private land data
+//		pieChart.segments[0].value = pvtData.area;
+//		pvtPer.innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
+//		//update public land data
+//		pieChart.segments[1].value = pubData.area;
+//		pubPer.innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";
+//		pieChart.update();
+//	}
+//	}
+//	
+//	var buffOpt = dom.byId("buffOpt");
+//	var navOpt = dom.byId("navOpt");
+//	var drawOpt = dom.byId("drawOpt");
+//	var pvtPer = dom.byId("privatePer");
+//	var pubPer = dom.byId("publicPer");
+//	
+//	on(buffOpt, "click", function(evt){
+//	if(buffOpt.checked){
+//		map.disableMapNavigation();
+//		drawPolygon.deactivate();
+//	}
+//	});
+//	
+//	on(navOpt, "click", function(evt){
+//	if(navOpt.checked){
+//		map.enableMapNavigation();
+//		drawPolygon.deactivate();
+//	}
+//	});
+//	
+//	on(drawOpt, "click", function(evt){
+//	if(drawOpt.checked){
+//		drawPolygon.activate(Draw.POLYGON);
+//	}
+//	});  
+//	
+//	on(drawPolygon, "draw-end", function(evt){  
+//	drawPolygon.deactivate();
+//	drawPolygon.activate(Draw.POLYGON);
+//	var geom = evt.geometry;
+//	if(geom.rings[0].length <= 3){
+//		alert("Polygon must have at least three vertices.");
+//		return;
+//	}
+//		
+//	var within = geometryEngine.within(geom, utahLyr.graphics[0].geometry);
+//	//check if buffer overlaps Utah    
+//	var overlaps = geometryEngine.overlaps(geom, utahLyr.graphics[0].geometry);
+//	if(!within && overlaps){
+//		//If buffer overlaps Utah, then only get the portion within Utah  
+//		geom = geometryEngine.intersect(geom, utahLyr.graphics[0].geometry);
+//	}
+//	if(!within && !overlaps){
+//		//If buffer is completely outside Utah, then warn the user
+//		console.log("outside of utah!");          
+//		return;
+//	}  
+//	var privateLand = getPrivateLand(geom);
+//	var publicLand = getPublicLand(geom, privateLand.geom);
+//	generateChart(privateLand, publicLand);
+//	});  
+//	
+//	var loading = dom.byId("loadingImg");    
+//	function showLoading() {
+//	esri.show(loading);
+//	}
+//	
+//	function hideLoading(error) {
+//	esri.hide(loading);
+//	}
+//	hideLoading();
+//	//on(map, "update-end", hideLoading);    
     
 
 
@@ -623,165 +623,165 @@ function(BootstrapMap, Chart,
 
 
 ////============ Begin clip code ===========================
-//
-//	//First, query results
-//	//$( "#generate-map" ).click(function() {
-//	function queryByBoundary() {
-//	
-//		var censusUrl = "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1";
-//		var queryTask = new QueryTask(censusUrl);
-//		
-//		//var landUrl = "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1";
-//		//var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
-//		censusLyr = new ArcGISDynamicMapServiceLayer(censusUrl, {
-//			definitionExpression: "STATE_NAME = 'Utah'",
-//			opacity: 0,
-//			//spatialReference: 102100
-//		});
-//		map.addLayer(censusLyr);
-//		//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
-//		//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-//		//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-//		
-//		//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
-//		//var queryTaskTouches = new QueryTask(drawGraphic);
-//	
-//		//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
-//		//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
-//		esriConfig.defaults.io.proxyUrl = "/proxy/";
-//		esriConfig.defaults.io.alwaysUseProxy = false;
-//		
-//		// Query
-//		//var query = new Query();
-//		query.returnGeometry = true;
-//		query.outFields = [ "*"
-//		//"OBJECTID", "ID", "GRIDCODE" 
-//		//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
-//		];
-//	//	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
-//		query.outSpatialReference = {
-//			"wkid": 102100
-//		};
-//		
-//		var infoTempContent = "Pop 2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
-//		//var infoTempContent = "Males = ${MALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
-//		//var infoTempContent = "OBJECTID = ${OBJECTID}<br/>ID = ${ID}<br/>GRIDCODE = ${GRIDCODE}";
-//		//Create InfoTemplate for styling the result infowindow.
-//		var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
-//		//var infoTemplate = new InfoTemplate("Block: ${GRIDCODE}", infoTempContent);
-//		map.infoWindow.resize(275, 190);
-//		
-//		//firstGraphic.setInfoTemplate(infoTemplate); //moved here
-//		
-//		//var currentClick = null;
-//		
-//		// Listen for map onClick event
-//		//map.on("click", function(evt) {
-//		//	map.graphics.clear();
-//		//	map.infoWindow.hide();
-//		//	currentClick = query.geometry = evt.mapPoint;
-//		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-//		//	queryTask.execute(query);
-//		//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-//		//});
-//		
-//		//Instead of map.on("click.."), run as part of click "generate-map"
-//
-//	//map.graphics.clear();
-//		//var queryTaskTouches = new QueryTask(drawGraphic);
-//		//map.infoWindow.hide();
-//		//currentClick = query.geometry = evt.mapPoint;
-//		//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-//		//queryTask.execute(query);
-//		//dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-//	
-//	
-//		//var firstGraphic = null;
-//		// Listen for QueryTask onComplete event
-//		
-//		//queryTask.on("complete", function(evt) {
-//			//firstGraphic = evt.featureSet.features[0];
-//		//	firstGraphic = drawGraphic.featureSet.features[0];
-//		//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-//		//	firstGraphic.setSymbol(symbol);
-//		//	//firstGraphic.setInfoTemplate(infoTemplate);
-//		//
-//		//	map.graphics.add(firstGraphic);
-//		//	query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
-//		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-//			//queryTaskTouches.execute(query);
-//			queryTask.execute(query);
-//			dom.byId('messages').innerHTML = "<b>2. Executing Polygon Intersects Query...</b>";
-//		//});
-//	
-//		// Listen for QueryTask executecomplete event
-//		//queryTaskTouches.on("complete", function(evt) {
-//		queryTask.on("complete", function(evt) {
-//			firstGraphic = evt.featureSet.features[0];
-//			//firstGraphic = drawGraphic.featureSet.features[0];
-//			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-//			firstGraphic.setSymbol(symbol);
-//			//firstGraphic.setInfoTemplate(infoTemplate);
-//		
-//			map.graphics.add(firstGraphic);
-//			
-//			
-//			var fset = evt.featureSet;
-//			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
-//		
-//			var resultFeaturesNoClip = fset.features;
-//			//var resultFeatures = fset.features;
-//			
-//			//Then, clip result
-//			//Pull first layer from the webmap and use it as input for the buffer operation
-//			//Use GeometryEngine geodesicBuffer  
-//			//buffers will have correct distance no matter what the spatial reference of the map is.
-//			drawGraphicGeoms = [];
-//			//drawGraphicGeoms[0] = graphicsUtils.getGeometries(drawGraphic);
-//			drawGraphicExtent = graphicsUtils.graphicsExtent(firstGraphic);
-//			privateLandGeoms[0] = graphicsUtils.getGeometries(censusLyr.graphics);
-//			
-//			//var privateLandGraphics = censusLyr.graphics;
-//			//var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
-//			//utahLyr.graphics.layerSpatialReference = map.spatialReference;
-//			var resultFeatureSet = geometryEngineAsync.clip(privateLandGeoms, drawGraphicExtent);
-//			//var within = geometryEngine.within(buffGeom, utahLyr.graphics[0].geometry);
-//			var resultFeatures = resultFeatureSet.features;
-//			//console.log("geometryEngine.clip: %o", resultFeatures);
-//			alert(resultFeatures);
-//			
-//			for (var i = 0, il = resultFeatures.length; i < il; i++) {
-//				var graphic = resultFeatures[i];
-//				graphic.setSymbol(symbol);
-//				graphic.setInfoTemplate(infoTemplate);
-//				map.graphics.add(graphic);
-//			}
-//		
-//			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
-//			map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
-//			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-//			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
-//			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-//			//map.infoWindow.setContent(content);
-//			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
-//		
-//			dom.byId('messages').innerHTML = "";
-//		});
-//		
-//		//averages all values from a featureset (multiple features)
-//		function average(fset, att) {
-//			var features = fset.features;
-//			var sum = 0;
-//			var featuresLength = features.length;
-//			for (var x = 0; x < featuresLength; x++) {
-//				sum = sum + features[x].attributes[att];
-//			}
-//			return Math.round(sum / featuresLength);
-//		}
-//	};
-//
-//document.getElementById ("generate-map").addEventListener ("click", queryByBoundary, false);
-//
+
+	//First, query results
+	//$( "#generate-map" ).click(function() {
+	function queryByBoundary() {
+	
+		var censusUrl = "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1";
+		var queryTask = new QueryTask(censusUrl);
+		
+		//var landUrl = "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1";
+		//var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
+		censusLyr = new ArcGISDynamicMapServiceLayer(censusUrl, {
+			definitionExpression: "STATE_NAME = 'Utah'",
+			opacity: 0,
+			//spatialReference: 102100
+		});
+		map.addLayer(censusLyr);
+		//var queryTaskTouches = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+		//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		//var queryTaskTouches = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		
+		//var queryTask = new QueryTask("http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0");
+		//var queryTaskTouches = new QueryTask(drawGraphic);
+	
+		//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
+		//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
+		esriConfig.defaults.io.proxyUrl = "/proxy/";
+		esriConfig.defaults.io.alwaysUseProxy = false;
+		
+		// Query
+		//var query = new Query();
+		query.returnGeometry = true;
+		query.outFields = [ "*"
+		//"OBJECTID", "ID", "GRIDCODE" 
+		//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
+		];
+	//	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
+		query.outSpatialReference = {
+			"wkid": 102100
+		};
+		
+		var infoTempContent = "Pop 2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "Males = ${MALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "OBJECTID = ${OBJECTID}<br/>ID = ${ID}<br/>GRIDCODE = ${GRIDCODE}";
+		//Create InfoTemplate for styling the result infowindow.
+		var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
+		//var infoTemplate = new InfoTemplate("Block: ${GRIDCODE}", infoTempContent);
+		map.infoWindow.resize(275, 190);
+		
+		//firstGraphic.setInfoTemplate(infoTemplate); //moved here
+		
+		//var currentClick = null;
+		
+		// Listen for map onClick event
+		//map.on("click", function(evt) {
+		//	map.graphics.clear();
+		//	map.infoWindow.hide();
+		//	currentClick = query.geometry = evt.mapPoint;
+		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+		//	queryTask.execute(query);
+		//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+		//});
+		
+		//Instead of map.on("click.."), run as part of click "generate-map"
+
+	//map.graphics.clear();
+		//var queryTaskTouches = new QueryTask(drawGraphic);
+		//map.infoWindow.hide();
+		//currentClick = query.geometry = evt.mapPoint;
+		//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+		//queryTask.execute(query);
+		//dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+	
+	
+		//var firstGraphic = null;
+		// Listen for QueryTask onComplete event
+		
+		//queryTask.on("complete", function(evt) {
+			//firstGraphic = evt.featureSet.features[0];
+		//	firstGraphic = drawGraphic.featureSet.features[0];
+		//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+		//	firstGraphic.setSymbol(symbol);
+		//	//firstGraphic.setInfoTemplate(infoTemplate);
+		//
+		//	map.graphics.add(firstGraphic);
+		//	query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
+		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+			//queryTaskTouches.execute(query);
+			queryTask.execute(query);
+			dom.byId('messages').innerHTML = "<b>2. Executing Polygon Intersects Query...</b>";
+		//});
+	
+		// Listen for QueryTask executecomplete event
+		//queryTaskTouches.on("complete", function(evt) {
+		queryTask.on("complete", function(evt) {
+			firstGraphic = evt.featureSet.features[0];
+			//firstGraphic = drawGraphic.featureSet.features[0];
+			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+			firstGraphic.setSymbol(symbol);
+			//firstGraphic.setInfoTemplate(infoTemplate);
+		
+			map.graphics.add(firstGraphic);
+			
+			
+			var fset = evt.featureSet;
+			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
+		
+			var resultFeaturesNoClip = fset.features;
+			//var resultFeatures = fset.features;
+			
+			//Then, clip result
+			//Pull first layer from the webmap and use it as input for the buffer operation
+			//Use GeometryEngine geodesicBuffer  
+			//buffers will have correct distance no matter what the spatial reference of the map is.
+			drawGraphicGeoms = [];
+			//drawGraphicGeoms[0] = graphicsUtils.getGeometries(drawGraphic);
+			drawGraphicExtent = graphicsUtils.graphicsExtent(firstGraphic);
+			privateLandGeoms[0] = graphicsUtils.getGeometries(censusLyr.graphics);
+			
+			//var privateLandGraphics = censusLyr.graphics;
+			//var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
+			//utahLyr.graphics.layerSpatialReference = map.spatialReference;
+			var resultFeatureSet = geometryEngineAsync.clip(privateLandGeoms, drawGraphicExtent);
+			//var within = geometryEngine.within(buffGeom, utahLyr.graphics[0].geometry);
+			var resultFeatures = resultFeatureSet.features;
+			//console.log("geometryEngine.clip: %o", resultFeatures);
+			alert(resultFeatures);
+			
+			for (var i = 0, il = resultFeatures.length; i < il; i++) {
+				var graphic = resultFeatures[i];
+				graphic.setSymbol(symbol);
+				graphic.setInfoTemplate(infoTemplate);
+				map.graphics.add(graphic);
+			}
+		
+			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
+			map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
+			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
+			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+			//map.infoWindow.setContent(content);
+			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
+		
+			dom.byId('messages').innerHTML = "";
+		});
+		
+		//averages all values from a featureset (multiple features)
+		function average(fset, att) {
+			var features = fset.features;
+			var sum = 0;
+			var featuresLength = features.length;
+			for (var x = 0; x < featuresLength; x++) {
+				sum = sum + features[x].attributes[att];
+			}
+			return Math.round(sum / featuresLength);
+		}
+	};
+
+document.getElementById ("generate-map").addEventListener ("click", queryByBoundary, false);
+
 
 //	//the next several functions  are for a geoprocessor task - I'm not sure that this is what I want..
 //	function initTools(evtObj) {
