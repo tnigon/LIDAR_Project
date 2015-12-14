@@ -472,17 +472,17 @@ function(BootstrapMap, Chart,
 	var publicSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([161, 255, 156, 0.7]));
 	var update = 0;
 	//map event handlers  
-	on(map, "click", createBuffer);
-	on(map, "mouse-drag", createBuffer);
-	on(map, "update-end", function(){
-	update++;
-	if(update === 1){
-		var fakeEvt = {};
-		fakeEvt.mapPoint = map.extent.getCenter();
-		createBuffer(fakeEvt);  
-	}
-	});
-	var drawPolygon = new Draw(map, { showTooltips: true });    
+	//on(map, "click", createBuffer);
+	//on(map, "mouse-drag", createBuffer);
+	//on(map, "update-end", function(){
+	//update++;
+	//if(update === 1){
+	//	var fakeEvt = {};
+	//	fakeEvt.mapPoint = map.extent.getCenter();
+	//	createBuffer(fakeEvt);  
+	//}
+	//});
+	//var drawPolygon = new Draw(map, { showTooltips: true });    
 	
 	
 	////Code for 10 mile radius circle AOI; utahLyr is used yet..
