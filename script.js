@@ -100,6 +100,7 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 		visibleToggle = "false";	//variable that will change based on visibility of hillshade
 	});
 	
+	map.addLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
 //map.on("load", initFunctionality);
 
 
@@ -431,7 +432,7 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
     //
     //    map.on("load", initFunctionality);
 
-	$( "#generate-map" ).click(function() {
+	//$( "#generate-map" ).click(function() {
 	//function initFunctionality(evt) {
 	
 		var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
@@ -480,74 +481,73 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 		//	queryTask.execute(query);
 		//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
 		//});
-		
-		//Instead of map.on("click.."), run as part of click "generate-map"
-
-	//map.graphics.clear();
-		//var queryTaskTouches = new QueryTask(drawGraphic);
-		//map.infoWindow.hide();
-		//currentClick = query.geometry = evt.mapPoint;
-		//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-		//queryTask.execute(query);
-		//dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
-	
-	
-		//var firstGraphic = null;
-		// Listen for QueryTask onComplete event
-		
-		//queryTask.on("complete", function(evt) {
-			//firstGraphic = evt.featureSet.features[0];
-		//	firstGraphic = drawGraphic.featureSet.features[0];
-		//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-		//	firstGraphic.setSymbol(symbol);
-		//	//firstGraphic.setInfoTemplate(infoTemplate);
-		//
-		//	map.graphics.add(firstGraphic);
-		//	query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
-		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-			//queryTaskTouches.execute(query);
-			queryTask.execute(query);
-			dom.byId('messages').innerHTML = "<b>2. Executing Polygon Intersects Query...</b>";
-		//});
-	
-		// Listen for QueryTask executecomplete event
-		//queryTaskTouches.on("complete", function(evt) {
-		queryTask.on("complete", function(evt) {
-			fset = evt.featureSet; //global variable - does this create a FeatureSet() object?
-			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
-		
-			var resultFeatures = fset.features;
-			for (var i = 0, il = resultFeatures.length; i < il; i++) {
-				var qualityGraphic = resultFeatures[i]; 
-				qualityGraphic.setSymbol(symbol);
-				qualityGraphic.setInfoTemplate(infoTemplate);
-				map.graphics.add(qualityGraphic);
-			}
-		
-			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
-			//map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
-			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
-			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
-			//map.infoWindow.setContent(content);
-			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
-			
-			gp = new Geoprocessor(fset);
-			gp.setOutSpatialReference({wkid:102100}); 
-			dom.byId('messages').innerHTML = "";
-		});
-		
-		//averages all values from a featureset (multiple features)
-		function average(fset, att) {
-			var features = fset.features;
-			var sum = 0;
-			var featuresLength = features.length;
-			for (var x = 0; x < featuresLength; x++) {
-				sum = sum + features[x].attributes[att];
-			}
-			return Math.round(sum / featuresLength);
-		}
-	});
+//		
+//		//Instead of map.on("click.."), run as part of click "generate-map"
+//
+//	//map.graphics.clear();
+//		//var queryTaskTouches = new QueryTask(drawGraphic);
+//		//map.infoWindow.hide();
+//		//currentClick = query.geometry = evt.mapPoint;
+//		//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+//		//queryTask.execute(query);
+//		//dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+//	
+//	
+//		//var firstGraphic = null;
+//		// Listen for QueryTask onComplete event
+//		
+//		//queryTask.on("complete", function(evt) {
+//			//firstGraphic = evt.featureSet.features[0];
+//		//	firstGraphic = drawGraphic.featureSet.features[0];
+//		//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+//		//	firstGraphic.setSymbol(symbol);
+//		//	//firstGraphic.setInfoTemplate(infoTemplate);
+//		//
+//		//	map.graphics.add(firstGraphic);
+//		//	query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
+//		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+//			//queryTaskTouches.execute(query);
+//			queryTask.execute(query);
+//			dom.byId('messages').innerHTML = "<b>2. Executing Polygon Intersects Query...</b>";
+//		//});
+//	
+//		// Listen for QueryTask executecomplete event
+//		//queryTaskTouches.on("complete", function(evt) {
+//		queryTask.on("complete", function(evt) {
+//			fset = evt.featureSet; //global variable - does this create a FeatureSet() object?
+//			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
+//		
+//			var resultFeatures = fset.features;
+//			for (var i = 0, il = resultFeatures.length; i < il; i++) {
+//				var qualityGraphic = resultFeatures[i]; 
+//				qualityGraphic.setSymbol(symbol);
+//				qualityGraphic.setInfoTemplate(infoTemplate);
+//				map.graphics.add(qualityGraphic);
+//			}
+//		
+//			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
+//			//map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
+//			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+//			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
+//			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+//			//map.infoWindow.setContent(content);
+//			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
+//			
+//
+//			dom.byId('messages').innerHTML = "";
+//		});
+//		
+//		//averages all values from a featureset (multiple features)
+//		function average(fset, att) {
+//			var features = fset.features;
+//			var sum = 0;
+//			var featuresLength = features.length;
+//			for (var x = 0; x < featuresLength; x++) {
+//				sum = sum + features[x].attributes[att];
+//			}
+//			return Math.round(sum / featuresLength);
+//		}
+//	});
 
 
     //    //var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/5");
@@ -619,9 +619,21 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 	//gp is layer to clip?
 	
 	//gp = new Geoprocessor("http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/Incident_Data_Extraction/GPServer/Extract%20Data%20Task");
-	//gp = new Geoprocessor(fset);
-	//gp.setOutSpatialReference({wkid:102100}); 
-	
+	gp = new Geoprocessor("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
+	gp.setOutSpatialReference({wkid:102100}); 
+			// Query
+		//var query = new Query();
+		gp.returnGeometry = true;
+		gp.outFields = [ "*"
+		//"OBJECTID", "ID", "GRIDCODE" 
+		//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
+		];
+	//	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
+	//	gp.outSpatialReference = {
+	//		"wkid": 102100
+	//	};
+		
+		
 	//registry.byId("polygon").on("click", function() {
 	//  activateTool(this.id);
 	//});
@@ -655,6 +667,8 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 	//Add a click handler that downloads data. Enabled via html onclick="extractData()"
 	//document.getElementById ("extract").addEventListener ("click", extractData, false);
 	//window.extractData = function() {
+		
+	////////////////////////////////////////////////////////////////////////////	
 	extractData = function() {
 		//get clip layers
 		var clipLayers = [];
@@ -663,18 +677,15 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 		//if ( registry.byId("layer3").get("checked") ) { clipLayers.push("Incident Areas"); } //for area
 		clipLayers.push("Incident Areas"); //clipLayers tells it to clip an area
 		
-		if ( fset.length === 0 ) {
-			alert("Where is qualityGraphic?")
-		} else { 
-			alert("#1  " + fset + "#2  " + fset.features + "#3  " + fset.features.length)
-		}
+		//if ( fset.length === 0 ) {
+		//	alert("Where is qualityGraphic?")
+		//} else { 
+		//	alert("#1  " + fset + "#2  " + fset.features + "#3  " + fset.features.length)
+		//}
 		//map.graphics.graphics.length indicates the number of queried polygons
 		if ( clipLayers.length === 0 || map.graphics.graphics.length === 0 ) { 
 			alert("Select layers to extract and draw an area of interest.");
 			return;
-		} else {
-			//map.graphics.graphics.length is number of graphics and is 1 more than fset.features.length (likely because it includes the initial handdrawn polygon)
-			alert(clipLayers.length + "   " + map.graphics.graphics.length)
 		}
 		featureSet = new FeatureSet(); //FeatureSet is a function
 		var features = [];
@@ -688,17 +699,167 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 		};
 		
 		//submits job to zip file and download it locally
-		domStyle.set(loading, "display", "inline-block");
-		gp.submitJob(params, completeCallback , statusCallback, function(error){
-			alert(error);
-			domStyle.set(loading, "display", "none");
-		});
+			domStyle.set(loading, "display", "inline-block");
+			gp.submitJob(params, completeCallback , statusCallback, function(error){
+				alert(error + "   Why is there an error?");
+				domStyle.set(loading, "display", "none");
+			});
+			
+	//subfunction - actually downloads file from url
+	//function downloadFile(outputFile){
+	//	map.graphics.clear();
+	
+		
+	//	window.location = theurl;
+	//}
+
+	//function displayAttributes(featureSet) {
+		//identify proxy page to use if the toJson payload to the geometry service is greater than 2000 characters.
+		//If this null is or not available the query operation will not work.  Otherwise it will do a http post via the proxy.
+		esriConfig.defaults.io.proxyUrl = "/proxy/";
+		esriConfig.defaults.io.alwaysUseProxy = false;
+				
+			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
+			//map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
+			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
+			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+			//map.infoWindow.setContent(content);
+			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
+			
+
+			dom.byId('messages').innerHTML = "";
+
+		
+	//	// Query
+	//	//var query = new Query();
+	//	featureSet.returnGeometry = true;
+	//	featureSet.outFields = [ "*"
+	//	//"OBJECTID", "ID", "GRIDCODE" 
+	//	//"FID", "OBJECTID", "ID", "GRIDCODE", "Shape_Leng", "Shape_Area"
+	//	];
+	//	query.outFields = ["POP2000", "POP2007", "MALES", "FEMALES", "FIPS"];
+	//	featureSet.outSpatialReference = {
+	//		"wkid": 102100
+	//	};
+		
+		var infoTempContent = "Pop 2007 = ${POP2007}<br/>POP2000 = ${POP2000}<br/>MALES = ${MALES}<br/>FEMALES = ${FEMALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "Males = ${MALES}" + "<br/><A href='#' onclick='map.graphics.clear();map.infoWindow.hide();'>Remove Selected Features</A>";
+		//var infoTempContent = "OBJECTID = ${OBJECTID}<br/>ID = ${ID}<br/>GRIDCODE = ${GRIDCODE}";
+		//Create InfoTemplate for styling the result infowindow.
+		//var infoTemplate = new InfoTemplate("Block: ${FIPS}", infoTempContent);
+		var infoTemplate = new InfoTemplate("Block", infoTempContent);
+		map.infoWindow.resize(275, 190);
+		
+		//firstGraphic.setInfoTemplate(infoTemplate); //moved here
+		
+	//	var currentClick = null;
+	//	
+	////the next several lines add display to graphics
+	//	fset = featureSet; //global variable - does this create a FeatureSet() object?
+	//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
+	//
+	//	var resultFeatures = fset.features;
+	//	for (var i = 0, il = resultFeatures.length; i < il; i++) {
+	//		var qualityGraphic = resultFeatures[i]; 
+	//		qualityGraphic.setSymbol(symbol);
+	//		qualityGraphic.setInfoTemplate(infoTemplate);
+	//		map.graphics.add(qualityGraphic);
+	//	}
+		
+		// Listen for map onClick event
+		//map.on("click", function(evt) {
+		//	map.graphics.clear();
+		//	map.infoWindow.hide();
+		//	currentClick = query.geometry = evt.mapPoint;
+		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+		//	queryTask.execute(query);
+		//	dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+		//});
+	
+				
+		//Instead of map.on("click.."), run as part of click "generate-map"
+
+	//map.graphics.clear();
+		//var queryTaskTouches = new QueryTask(drawGraphic);
+		//map.infoWindow.hide();
+		//currentClick = query.geometry = evt.mapPoint;
+		//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+		//queryTask.execute(query);
+		//dom.byId('messages').innerHTML = "<b>1. Executing Point Intersection Query...</b>";
+	
+	
+		//var firstGraphic = null;
+		// Listen for QueryTask onComplete event
+		
+		//queryTask.on("complete", function(evt) {
+			//firstGraphic = evt.featureSet.features[0];
+		//	firstGraphic = drawGraphic.featureSet.features[0];
+		//	var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+		//	firstGraphic.setSymbol(symbol);
+		//	//firstGraphic.setInfoTemplate(infoTemplate);
+		//
+		//	map.graphics.add(firstGraphic);
+		//	query.geometry = webMercatorUtils.webMercatorToGeographic(firstGraphic.geometry);
+		//	query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+			//queryTaskTouches.execute(query);
+	//		queryTask.execute(query);
+			dom.byId('messages').innerHTML = "<b>2. Executing Polygon Intersects Query...</b>";
+		//});
+	
+		// Listen for QueryTask executecomplete event
+		//queryTaskTouches.on("complete", function(evt) {
+//		queryTask.on("complete", function(evt) {
+//			fset = evt.featureSet; //global variable - does this create a FeatureSet() object?
+//			var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 2), new Color([0, 0, 255, 0.20]));
+//		
+//			var resultFeatures = fset.features;
+//			for (var i = 0, il = resultFeatures.length; i < il; i++) {
+//				var qualityGraphic = resultFeatures[i]; 
+//				qualityGraphic.setSymbol(symbol);
+//				qualityGraphic.setInfoTemplate(infoTemplate);
+//				map.graphics.add(qualityGraphic);
+//			}
+//		
+//			//map.infoWindow.setTitle("Comparing " + firstGraphic.attributes.FIPS + " census block group with surrounding block groups");
+//			//map.infoWindow.setTitle("Comparing hand-drawn field boundary with surrounding polygons in the quality layer");
+//			//var content = "<table border='1'><th><td>Selected</td><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + firstGraphic.attributes.POP2007 + "</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + firstGraphic.attributes.POP2000 + "</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + firstGraphic.attributes.MALES + "</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + firstGraphic.attributes.FEMALES + "</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+//			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(fset, 'MALES') + "</td></tr>" + "</table>"
+//			//var content = "<table border='1'><th><td>Average Surrounding</td></th>" + "<tr><td>Pop 2007</td><td>" + average(evt.featureSet, 'POP2007') + "</td></tr>" + "<tr><td>Pop 2000</td><td>" + average(fset, 'POP2000') + "</td></tr>" + "<tr><td>Males</td><td>" + average(fset, 'MALES') + "</td></tr>" + "<tr><td>Females</td><td>" + average(fset, 'FEMALES') + "</td></tr>" + "</table>";
+//			//map.infoWindow.setContent(content);
+//			//map.infoWindow.show(map.toScreen(currentClick), map.getInfoWindowAnchor(map.toScreen(currentClick)));
+//			
+//
+//			dom.byId('messages').innerHTML = "";
+//		});
+		
+		//averages all values from a featureset (multiple features)
+		//function average(fset, att) {
+		//	var features = fset.features;
+		//	var sum = 0;
+		//	var featuresLength = features.length;
+		//	for (var x = 0; x < featuresLength; x++) {
+		//		sum = sum + features[x].attributes[att];
+		//	}
+		//	return Math.round(sum / featuresLength);
+		//}
 	};
+
+	//show 
+	//document.getElementById ("generate-map").addEventListener ("click", extractData, false);
 	
 	//when job is submitted, zip file is created and downloaded
 	function completeCallback(jobInfo){
+		var imageParams = new esri.layers.ImageParameters();
+		imageParams.imageSpatialReference = map.spatialReference;
+		gp.getResultImageLayer(jobInfo.jobId, "SoilQuality",imageParams, function(gpLayer){
+			gpLayer.setOpacity(0.5);
+			map.addLayer(gpLayer);
+			
+		});
+		
 		if ( jobInfo.jobStatus !== "esriJobFailed" ) {
-		gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
+			gp.getResultData(jobInfo.jobId, "Output_Zip_File", downloadFile);
 		}
 	}
 	
@@ -706,7 +867,7 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 	function statusCallback(jobInfo) {
 		var status = jobInfo.jobStatus;
 		if ( status === "esriJobFailed" ) {
-		alert(status);
+		alert(status + jobInfo);
 		domStyle.set("loading", "display", "none");
 		}
 		else if (status === "esriJobSucceeded"){
@@ -721,8 +882,11 @@ function(dom, domConstruct, domStyle, json, on, parser, query, ready, sniff, arr
 		window.location = theurl;
 	}
 	
-	//Add a click handler that downloads data. Enabled via html onclick="extractData()"
-	document.getElementById ("extract").addEventListener ("click", extractData, false);
+	//Add a click handler that generates map and shows it
+	document.getElementById ("generate-map").addEventListener ("click", extractData, false);
+	
+	//Add a click handler that downloads data.
+	//document.getElementById ("download-data").addEventListener ("click", completeCallback, false);
 //============ End clip code ===========================	  
 
 
