@@ -460,7 +460,7 @@ function(BootstrapMap, Chart,
 	var privateLandGraphics = landLyr.graphics;
 	var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
 	//Only work with private land that intersects the buffer (essentially a select by location)  
-	var priInBuffer = array.filter(privateLandGeoms, function(item, i){
+	var priInBuffer = arrayUtils.filter(privateLandGeoms, function(item, i){
 		if(geometryEngine.intersects(item, geom)){
 		return item;
 		}
