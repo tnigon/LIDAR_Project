@@ -239,7 +239,7 @@ function(BootstrapMap, Chart,
 
 	function getAreaAndLength(evtObj) { //executed on "draw-end" in initTools()
 		var map = this,
-		var drawGraphicGeom = evtObj.geometry;
+		drawGraphicGeom = evtObj.geometry;
 		if(drawGraphicGeom.rings[0].length <= 3){
 			alert("Polygon must have at least three vertices.");
 			return;
@@ -304,7 +304,6 @@ function(BootstrapMap, Chart,
 			});
 		tb.deactivate(); //deactivates draw tool after polygon is drawn
 		map.showZoomSlider();
-		return drawGraphicGeom;
 	}
 	
 	function clipQuality(drawGraphicGeom, utahLyr) {
