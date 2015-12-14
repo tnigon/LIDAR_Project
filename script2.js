@@ -239,7 +239,7 @@ function(BootstrapMap, Chart,
 
 	function getAreaAndLength(evtObj) { //executed on "draw-end" in initTools()
 		var map = this,
-		drawGraphicGeom = evtObj.geometry;
+		var drawGraphicGeom = evtObj.geometry;
 		if(drawGraphicGeom.rings[0].length <= 3){
 			alert("Polygon must have at least three vertices.");
 			return;
@@ -304,6 +304,7 @@ function(BootstrapMap, Chart,
 			});
 		tb.deactivate(); //deactivates draw tool after polygon is drawn
 		map.showZoomSlider();
+		return drawGraphicGeom;
 	}
 	
 	function clipQuality(drawGraphicGeom, utahLyr) {
@@ -357,8 +358,6 @@ function(BootstrapMap, Chart,
 			$("#draw-boundary option:contains(" + theText + ")").attr('selected', 'selected');
 		}
 	};
-	
-	document.getElementById ("generate-map").addEventListener ("click", clipQuality(drawGraphicGeom, utahLyr), false);
 	
 //============ End draw field boundary code ===========================
 
@@ -619,6 +618,8 @@ function(BootstrapMap, Chart,
 		}
 	}
 	
+	document.getElementById ("generate-map").addEventListener ("click", clipQuality(drawGraphicGeom, utahLyr), false);
+		
 	var buffOpt = dom.byId("buffOpt");
 	var navOpt = dom.byId("navOpt");
 	var drawOpt = dom.byId("drawOpt");
