@@ -299,6 +299,8 @@ function(BootstrapMap,
 			$("#draw-boundary option:contains(" + theText + ")").attr('selected', 'selected');
 		}
 	};
+	
+
 //============ End draw field boundary code ===========================
 
 
