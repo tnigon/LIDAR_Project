@@ -485,40 +485,40 @@ function(BootstrapMap, Chart,
 	var drawPolygon = new Draw(map, { showTooltips: true });    
 	
 	
-	//Code for 10 mile radius circle AOI; utahLyr is used yet..
-	function createBuffer(evt){
-		if(buffOpt.checked){
-			map.graphics.clear();
-			var centerPt = evt.mapPoint;
-			//Get buffer of map click point
-			buffGeom = geometryEngine.geodesicBuffer(centerPt, 10, "miles");
-			//check if buffer is completely within Utah
-			var within = geometryEngine.within(buffGeom, utahLyr.graphics[0].geometry);
-			//check if buffer overlaps Utah    
-			var overlaps = geometryEngine.overlaps(buffGeom, utahLyr.graphics[0].geometry);
-		
-			if(!within && overlaps){
-			//If buffer overlaps Utah, then only get the portion within Utah  
-			buffGeom = geometryEngine.intersect(buffGeom, utahLyr.graphics[0].geometry);
-			}
-			if(!within && !overlaps){
-			//If buffer is completely outside Utah, then warn the user
-			console.log("outside of utah!");          
-			return;
-			} 
-			map.graphics.add(new Graphic(buffGeom, buffSymFade));
-		
-			var privateLand = getPrivateLand(buffGeom);
-			var publicLand = getPublicLand(buffGeom, privateLand.geom);
-			generateChart(privateLand, publicLand);   
-		} else if(drawOpt.checked){
-		//if(drawOpt.checked){
-			map.graphics.clear();
-		}
-		else{
-			return;
-		}
-	}
+	////Code for 10 mile radius circle AOI; utahLyr is used yet..
+	//function createBuffer(evt){
+	//	if(buffOpt.checked){
+	//		map.graphics.clear();
+	//		var centerPt = evt.mapPoint;
+	//		//Get buffer of map click point
+	//		buffGeom = geometryEngine.geodesicBuffer(centerPt, 10, "miles");
+	//		//check if buffer is completely within Utah
+	//		var within = geometryEngine.within(buffGeom, utahLyr.graphics[0].geometry);
+	//		//check if buffer overlaps Utah    
+	//		var overlaps = geometryEngine.overlaps(buffGeom, utahLyr.graphics[0].geometry);
+	//	
+	//		if(!within && overlaps){
+	//		//If buffer overlaps Utah, then only get the portion within Utah  
+	//		buffGeom = geometryEngine.intersect(buffGeom, utahLyr.graphics[0].geometry);
+	//		}
+	//		if(!within && !overlaps){
+	//		//If buffer is completely outside Utah, then warn the user
+	//		console.log("outside of utah!");          
+	//		return;
+	//		} 
+	//		map.graphics.add(new Graphic(buffGeom, buffSymFade));
+	//	
+	//		var privateLand = getPrivateLand(buffGeom);
+	//		var publicLand = getPublicLand(buffGeom, privateLand.geom);
+	//		generateChart(privateLand, publicLand);   
+	//	} else if(drawOpt.checked){
+	//	//if(drawOpt.checked){
+	//		map.graphics.clear();
+	//	}
+	//	else{
+	//		return;
+	//	}
+	//}
 	
 	function getPrivateLand(geom){
 		var privateLandGraphics = landLyr.graphics;
@@ -572,8 +572,8 @@ function(BootstrapMap, Chart,
 			map.graphics.add(new Graphic(pvtData.geom, privateSym));
 		if(pubData.geom)
 			map.graphics.add(new Graphic(pubData.geom, publicSym));
-		if(!drawOpt.checked)
-			map.graphics.add(new Graphic(buffGeom, buffSym));
+		//if(!drawOpt.checked)
+		//	map.graphics.add(new Graphic(buffGeom, buffSym));
 		if(!pieChart){
 			var data = [
 			{
@@ -619,31 +619,31 @@ function(BootstrapMap, Chart,
 	
 	document.getElementById ("generate-map").addEventListener ("click", clipQuality(drawGraphicGeom, utahLyr), false);
 		
-	var buffOpt = dom.byId("buffOpt");
-	var navOpt = dom.byId("navOpt");
-	var drawOpt = dom.byId("drawOpt");
+	//var buffOpt = dom.byId("buffOpt");
+	//var navOpt = dom.byId("navOpt");
+	//var drawOpt = dom.byId("drawOpt");
 	var pvtPer = dom.byId("privatePer");
 	var pubPer = dom.byId("publicPer");
 	
-	on(buffOpt, "click", function(evt){
-		if(buffOpt.checked){
-			map.disableMapNavigation();
-			drawPolygon.deactivate();
-		}
-	});
+	//on(buffOpt, "click", function(evt){
+	//	if(buffOpt.checked){
+	//		map.disableMapNavigation();
+	//		drawPolygon.deactivate();
+	//	}
+	//});
 	
-	on(navOpt, "click", function(evt){
-		if(navOpt.checked){
-			map.enableMapNavigation();
-			drawPolygon.deactivate();
-		}
-	});
+	//on(navOpt, "click", function(evt){
+	//	if(navOpt.checked){
+	//		map.enableMapNavigation();
+	//		drawPolygon.deactivate();
+	//	}
+	//});
 	
-	on(drawOpt, "click", function(evt){
-		if(drawOpt.checked){
-			drawPolygon.activate(Draw.POLYGON);
-		}
-	});  
+	//on(drawOpt, "click", function(evt){
+	//	if(drawOpt.checked){
+	//		drawPolygon.activate(Draw.POLYGON);
+	//	}
+	//});  
 	
 	//on(drawPolygon, "draw-end", function(evt){  
 	//	drawPolygon.deactivate();
