@@ -51,7 +51,7 @@ function(BootstrapMap, Chart,
     parser.parse(); // Create all dijits.
 	var portalUrl = "http://www.arcgis.com"; //a place to store the imported zipped shapefile
 
-	//var map;
+	var map;
 	
     // Get a reference to the ArcGIS Map class
 	var initExtent = new Extent(-12525064, 4509990, -12329386, 4621283, new SpatialReference({wkid:3857}));
