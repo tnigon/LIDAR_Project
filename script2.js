@@ -56,24 +56,23 @@ function(BootstrapMap, Chart,
     // Get a reference to the ArcGIS Map class
 	var initExtent = new Extent(-12525064, 4509990, -12329386, 4621283, new SpatialReference({wkid:3857}));
 	
-    //window.map = BootstrapMap.create("mapDiv",{
-	//	//center: [-93.0906350,  44.669956],
-	//	//center: [-118.198, 33.805],
-	//	zoom: 11,
-	//	//zoom: 13,
-	//	basemap: "hybrid",
-	//	extent: initExtent,
-	//	scrollWheelZoom: true
-    //});
-	
-	//create map
-    map = new Map("mapDiv", {
-		center: [-93.0906350,  44.669956],
+    window.map = BootstrapMap.create("mapDiv",{
+		//center: [-93.0906350,  44.669956],
+		//center: [-118.198, 33.805],
 		//zoom: 11,
+		//zoom: 13,
 		basemap: "hybrid",
 		extent: initExtent,
-		sliderStyle: "small",
-	});
+		scrollWheelZoom: true
+    });
+	
+	////create map
+    //map = new Map("mapDiv", {
+	//	center: [-93.0906350,  44.669956],
+	//	zoom: 11,
+	//	basemap: "hybrid",
+	//	sliderStyle: "small",
+	//});
 
 	//on load, initiate draw, getAreaAndLength, and hillshade layer
 	map.on("load", function(){
@@ -411,8 +410,8 @@ function(BootstrapMap, Chart,
 	var publicSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([161, 255, 156, 0.7]));
 	var update = 0;
 	//map event handlers  
-	//on(map, "click", createBuffer);
-	//on(map, "mouse-drag", createBuffer);
+	on(map, "click", createBuffer);
+	on(map, "mouse-drag", createBuffer);
 	on(map, "update-end", function(){
 	update++;
 	if(update === 1){
