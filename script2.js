@@ -56,23 +56,24 @@ function(BootstrapMap, Chart,
     // Get a reference to the ArcGIS Map class
 	var initExtent = new Extent(-12525064, 4509990, -12329386, 4621283, new SpatialReference({wkid:3857}));
 	
-    window.map = BootstrapMap.create("mapDiv",{
-		//center: [-93.0906350,  44.669956],
-		//center: [-118.198, 33.805],
-		zoom: 11,
-		//zoom: 13,
+    //window.map = BootstrapMap.create("mapDiv",{
+	//	//center: [-93.0906350,  44.669956],
+	//	//center: [-118.198, 33.805],
+	//	zoom: 11,
+	//	//zoom: 13,
+	//	basemap: "hybrid",
+	//	extent: initExtent,
+	//	scrollWheelZoom: true
+    //});
+	
+	//create map
+    map = new Map("mapDiv", {
+		center: [-93.0906350,  44.669956],
+		//zoom: 11,
 		basemap: "hybrid",
 		extent: initExtent,
-		scrollWheelZoom: true
-    });
-	
-	////create map
-    //map = new Map("mapDiv", {
-	//	center: [-93.0906350,  44.669956],
-	//	zoom: 11,
-	//	basemap: "hybrid",
-	//	sliderStyle: "small",
-	//});
+		sliderStyle: "small",
+	});
 
 	//on load, initiate draw, getAreaAndLength, and hillshade layer
 	map.on("load", function(){
