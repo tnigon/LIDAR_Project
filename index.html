@@ -9,6 +9,35 @@
 		<link rel="stylesheet" type="text/css" href="bootstrapmap.css">
 		<link rel="stylesheet" type="text/css" href="style_CustomContainer.css">
 		
+		<style>
+		#results{
+			bottom: 50px;
+			right: 20px;
+			width: 275px;
+		}
+		#title{
+			text-align: center;
+		}
+		#myChart{
+			padding-left: 10px;
+		}    
+		.mainStyle{
+			position: absolute;
+			z-index: 99;
+			background-color: black;
+			color: cornsilk;
+			border-radius: 8px;
+			padding: 15px;
+			opacity: 0.8;
+		}
+		.pvt{
+			color: #8A8A8A
+		}
+		.pub{
+			color: #99F095;
+		}
+		</style>
+		
 		<script type="text/javascript">
 			var package_path = "http://esri.github.com/bootstrap-map-js/src/js";
 			var dojoConfig = {
@@ -20,6 +49,7 @@
 		</script>
 		<script src="http://js.arcgis.com/3.14/"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<!-- <script src="https://cdnjs.com/libraries/chart.js"></script> -->
 		<script type="text/javascript" src="script2.js"></script>	
 		<script type="text/javascript" src="bootstrap.js"></script>
 	</head>
@@ -177,6 +207,20 @@
 							<h2 class="panel-title">Query Results</h2>
 						</div>
 						<div class="panel-body">
+							<div id="map"><img id="loadingImg" src="http://developers.arcgis.com/javascript/samples/map_showloading/images/loading.gif" style="position:absolute; right:49%; top:49%; z-index:100;" />
+								<div class="mainStyle" id="results"><h2 id="title">Utah Land Ownership</h2>
+								<canvas id="myChart" width="250" height="250"></canvas><br><br>
+								<span class="pvt">Private land: <span id="privatePer"></span></span><br>
+								<span class="pub">Public land: <span id="publicPer"></span></span>
+								<br><br>
+								Click or drag on the map to view private and government-owned land within 10 miles of the mouse click.
+								Hover over the pie chart to view the area of each ownership type within the 10-mile buffer. 
+								<br><br><input type="radio" name="operation" id="buffOpt" checked>View ownership by map click
+								<br><br><input type="radio" name="operation" id="drawOpt">View ownership by polygon   
+								<br><br><input type="radio" name="operation" id="navOpt">Navigate Map 
+								</div>
+							</div>
+							
 							<div class="btn-group-vertical">	
 								<div class="col-md-12 btn btn-default">
 									<div class="col-md-offset-4">  <!-- Centers the "DRAW BOUNDARY" text -->
