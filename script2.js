@@ -3,7 +3,7 @@
 
 //IP address of virtual machine where ArcGIS Services can be accessed
 var virtualMachine = "54.197.237.185"
-var gp, map, landLyr, utahLyr, pieChart, buffGeom;
+var gp, map, landLyr, utahLyr, pieChart, drawGraphicGeom;
 var selectionToolbar;	
 	
 //create an ArcGIS API map
