@@ -385,6 +385,9 @@ function(BootstrapMap, Chart,
 		dom.byId("perimeter").innerHTML = "";
 		dom.byId("OM").innerHTML = "";
 		dom.byId("phos").innerHTML = "";
+		dom.byId("lowVarPer").innerHTML = "";
+		dom.byId("medVarPer").innerHTML = "";
+		dom.byId("highVarPer").innerHTML = "";
 		barChart.clear();
 		
 		//Don't need the following because of this: barChart.datasets[0].bars[0].value = [pvtData.area];
