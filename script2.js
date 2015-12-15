@@ -2,7 +2,7 @@
 //=====  10/17/2015   ======
 
 //IP address of virtual machine where ArcGIS Services can be accessed
-var virtualMachine = "54.197.237.185"
+var virtualMachine = "52.90.95.238"
 var gp, map, organicMatter, phosphorus, landLyr, utahLyr, barChart, drawGraphic, drawGraphicGeom, pvtGraphic, pubGraphic;
 
 //create an ArcGIS API map
@@ -99,7 +99,7 @@ function(BootstrapMap, Chart,
 		hillshade = new esri.layers.ArcGISTiledMapServiceLayer("http://" + virtualMachine.concat(":6080/arcgis/rest/services/LIDAR_basemap_mosaic/MapServer"));
 		map.addLayer(hillshade); //add hillshade layer
 		hillshade.hide();	//hide hillshade layer on first load - user can toggle it on
-		visibleToggle = "false";	//variable that will change based on visibility of hillshade
+		visibleToggle = "false";	//variable that will change based on visibility of hillshade  
 	}
 	
 	//map.addLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/1");
@@ -374,6 +374,7 @@ function(BootstrapMap, Chart,
 
 	//Clear existing polygon from map from clicking "Clear Boundary" button
 	$( "#clear-boundary" ).click(function() {
+	//clearAllData = function() {
 		//alert( "This will remove your boundary from the map. Are you sure?" );
 		map.graphics.remove(drawGraphic);
 		map.graphics.remove(pvtGraphic);
@@ -385,13 +386,17 @@ function(BootstrapMap, Chart,
 		dom.byId("OM").innerHTML = "";
 		dom.byId("phos").innerHTML = "";
 		barChart.clear();
-		removeChartData = function() {
-			for (var i = 0, il = 3; i < il; i++) {
-				barChart.removeData()
-			}
-		}
-		removeChartData();
+		
+		//Don't need the following because of this: barChart.datasets[0].bars[0].value = [pvtData.area];
+		//removeChartData = function() {
+		//	for (var i = 0, il = 9; i < il; i++) {
+		//		barChart.removeData()
+		//	}
+		//}
+		//removeChartData();
 	});
+	
+	//document.getElementById ("clear-boundary").addEventListener ("click", clearAllData(), false);
 //============ End clear boundary code ===========================
 
 
@@ -449,20 +454,46 @@ function(BootstrapMap, Chart,
 //============ End toggle imported layer code ===========================
 
 //============ Begin Utah Clip code =============================
-	//var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
-	var landUrl = "http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0";
-	//Code clips by utahLyr, so we should replace utahLyr.graphics[0].geometry with drawGraphicGeom
-	//var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
-	var statesUrl = "http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/mn_county_boundaries/FeatureServer/0";
-	landLyr = new FeatureLayer(landUrl, {
-	opacity: 0,
-	definitionExpression: "STATE_LGD = 'Private'"
-	});
-	utahLyr = new FeatureLayer(statesUrl, {
-	//definitionExpression: "STATE_NAME = 'Utah'",
-	definitionExpression: "CTY_NAME = 'Dakota'",
-	opacity: 0
-	});
+
+	//addFeatures = function () {
+		var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
+		//var landUrl = "http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0";
+		//var landUrl = ("http://" + virtualMachine.concat(":6080/arcgis/rest/services/DakotaQuality/MapServer"));
+		
+		//Code clips by utahLyr, so we should replace utahLyr.graphics[0].geometry with drawGraphicGeom
+		var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
+		//var statesUrl = "http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/mn_county_boundaries/FeatureServer/0";
+		//var statesUrl = ("http://" + virtualMachine.concat(":6080/arcgis/rest/services/CountiesMN/MapServer"));
+		
+		
+		landLyr = new FeatureLayer(landUrl, {
+		opacity: 0,
+		definitionExpression: "STATE_LGD = 'Private'"
+		//definitionExpression: "GRIDCODE = '1'"
+		});
+		
+		utahLyr = new FeatureLayer(statesUrl, {
+		definitionExpression: "STATE_NAME = 'Utah'",
+		//definitionExpression: "CTY_NAME = 'Dakota'",
+		opacity: 0
+		});
+		
+	//	var query = new Query();
+	//	landLyr = new FeatureLayer(landUrl, {
+	//		opacity: 0,
+	//		//definitionExpression: "STATE_LGD = 'Private'"
+	//		//definitionExpression: "GRIDCODE = '1'"
+	//		outFields: ["*"]
+	//	});
+	//	query.geometry = drawGraphicGeom;
+	//	landLyr.selectFeatures(query,landLyr.SELECTION_NEW);
+	//	
+	//	utahLyr = new FeatureLayer(statesUrl, {
+	//		//definitionExpression: "STATE_NAME = 'Utah'",
+	//		definitionExpression: "CTY_NAME = 'Dakota'",
+	//		opacity: 0
+	//	});
+	//}
 	
 	var pvtRenderer = new SimpleRenderer(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color("black"), 0), new Color([211,222,4,1])));
 	landLyr.setRenderer(pvtRenderer);
@@ -527,8 +558,11 @@ function(BootstrapMap, Chart,
 	Chart.defaults.global.responsive = true;
 	Chart.defaults.global.maintainAspectRatio = true;
 	Chart.defaults.global.animationEasing = "linear";
-	Chart.defaults.global.tooltipTemplate = "<%= addCommas(value) %>"
+	Chart.defaults.global.tooltipTemplate = "<%=addCommas(value)%>"
 	Chart.defaults.global.scaleLabel = "<%=addCommas(value)%>"
+	Chart.defaults.global.animationSteps = 50;
+	Chart.defaults.global.animateRotate = true;
+	Chart.defaults.global.animateScale = true;
 	
 	Chart.types.Bar.extend({ //Adds y-axis label to charts
 		name: "BarAlt",
@@ -542,13 +576,14 @@ function(BootstrapMap, Chart,
 			ctx.textBaseline = "bottom";
 			ctx.fillStyle = this.options.scaleFontColor;
 			// position
-			var x = this.scale.xScalePaddingLeft * 0.4;
-			var y = this.chart.height / 2;
+			var x = this.scale.xScalePaddingLeft * 0.3;
+			//var y = this.chart.height / 2; //for rotated title
+			var y = this.chart.height;
 			// change origin
 			ctx.translate(x, y)
 			// rotate text
-			ctx.rotate(-90 * Math.PI / 180);
-			ctx.fillText(this.datasets[0].label, 0, 0);
+			//ctx.rotate(-90 * Math.PI / 180); //for rotated title
+			ctx.fillText("Acres", 0, 0);
 			ctx.restore();
 		}
 	});
@@ -562,45 +597,43 @@ function(BootstrapMap, Chart,
 		//	map.graphics.add(new Graphic(buffGeom, buffSym));
 		if(!barChart){  //if barChart is undefined, return false, otherwise return true and evaluate
 			var data = {
+				//labels: ["Low", "Medium", "High"],
 				labels: ["Low", "Medium", "High"],
 				datasets: [
 					{
-						label: "Dataset 1",
-						fillColor: "rgba(53,122,56,0.9)",
-						strokeColor: "rgb(53,122,56,0.9)",
-						highlightFill: "rgb(53,122,56,1)",
-						highlightStroke: "rgb(53,122,56,1)",
+						label: "Dataset1",
 						data: [pvtData.area, 0, pubData.area]
 					}
 				]
 			};
 			
-			//label: "Low"
-			//color: "#8A8A8A",
-			//highlight: "#B5B5B5"
-			//},
-			//{
-			//label: "Government (sq mi)",
-			//value: pubData.area,
-			//color: "#99F095",
-			//highlight: "#A1FF9C"  
-			//}
+			//var data = {
+			//	labels: ["Low", "Medium", "High"],
+			//	datasets: [
+			//		{
+			//			label: "Dataset 1",
+			//			fillColor: "rgba(53,122,56,0.9)",
+			//			strokeColor: "rgb(53,122,56,0.9)",
+			//			highlightFill: "rgb(53,122,56,1)",
+			//			highlightStroke: "rgb(53,122,56,1)",
+			//			data: [pvtData.area, 0, pubData.area]
+			//		}
+			//	]
 			//};
 		
 			var opts = {
 				showScale: true,  // Boolean - If we should show the scale at all
 				scaleShowLabels: true, // Boolean - Whether to show labels on the scale
 				responsive: true, // Boolean - whether or not the chart should be responsive and resize when the browser does
-				animationSteps : 100,
+				animationSteps : 50,
 				animationEasing : "linear",
-				animateRotate : true,
-				animateScale : true,
+				animateRotate : false,
+				animateScale : false,
 				//scaleShowGridLines : true, //Boolean - Whether grid lines are shown across the chart
 				scaleGridLineColor : "rgba(0,0,0,.25)", //String - Color of grid lines
 				scaleShowHorizontalLines: true,  //Boolean - Whether to show horizontal lines (except X axis)
 				barValueSpacing : 5, //Number - Spacing between each of the X value sets
-				barDatasetSpacing : 1,  //Number - Spacing between data sets within X values
-				scaleShowLabels: true // Boolean - Whether to show labels on the scale
+				barDatasetSpacing : 1  //Number - Spacing between data sets within X values
 				//scaleLabel: "      Acres" // Interpolated JS string - can access value
 			};
 			
@@ -610,23 +643,63 @@ function(BootstrapMap, Chart,
 				// make enough space on the right side of the graph
 				scaleLabel: "          Acres"
 			});
+			
+			//Recolor the bars
+			recolorBars = function() {
+				barChart.datasets[0].bars[0].fillColor = "rgba(53,122,56,0.75)";
+				barChart.datasets[0].bars[1].fillColor = "rgba(255,204,0,0.75)";
+				barChart.datasets[0].bars[2].fillColor = "rgba(255,0,0,0.75)";
+				barChart.datasets[0].bars[0].strokeColor = "rgba(53,122,56,0.9)";
+				barChart.datasets[0].bars[1].strokeColor = "rgba(255,204,0,0.9)";
+				barChart.datasets[0].bars[2].strokeColor = "rgba(255,0,0,0.9)";
+				barChart.datasets[0].bars[0].highlightFill = "rgba(53,122,56,0.9)";
+				barChart.datasets[0].bars[1].highlightFill = "rgba(255,204,0,0.9)";
+				barChart.datasets[0].bars[2].highlightFill = "rgba(255,0,0,0.9)";
+				barChart.datasets[0].bars[0].highlightStroke = "rgba(53,122,56,1)";
+				barChart.datasets[0].bars[1].highlightStroke = "rgba(255,204,0,1)";
+				barChart.datasets[0].bars[2].highlightStroke = "rgba(255,0,0,1)";
+				barChart.update();
+			}
+			recolorBars();
+			
 			dom.byId("lowVarPer").innerHTML = "&nbsp;" + Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";   
 			dom.byId("medVarPer").innerHTML = "&nbsp;" + Math.round(10000*0 / (pubData.area + pvtData.area))/100 + "%";  
 			dom.byId("highVarPer").innerHTML = "&nbsp;" + Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";  			
 		}
 		else{
+			
+			// Reduce the animation steps for demo clarity.
+			//var myLiveChart = new Chart(ctx).Line(startingData, {animationSteps: 15});
+				
+			updateChartData = function() {
+				// Get a random index point
+				//var indexToUpdate = Math.round(Math.random() * startingData.labels.length);
+				// Get index to update (needed?)
+				
+				
+				// Update one of the points in the second dataset
+				//myLiveChart.datasets[1].points[indexToUpdate].value = Math.random() * 100;
+				// Update all points in dataset
+				barChart.datasets[0].bars[0].value = [pvtData.area];
+				barChart.datasets[0].bars[1].value = [0];
+				barChart.datasets[0].bars[2].value = [pubData.area];
+
+				barChart.update();
+			};
+			updateChartData();
 			//update private land data
-			barChart.addData([pvtData.area], "Low");
-			barChart.addData([0], "Medium")
-			barChart.addData([pubData.area], "High");
+			//barChart.addData([pvtData.area], "Low");
+			//barChart.addData([0], "Medium")
+			//barChart.addData([pubData.area], "High");
+			recolorBars();
 			//barChart.data.datasets.data[0].value = pvtData.area;
 			//barChart.segments[0].value = pvtData.area;
-			dom.byId("lowVarPer").innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
-			dom.byId("medVarPer").innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
+			dom.byId("lowVarPer").innerHTML = "&nbsp;" + Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
+			dom.byId("medVarPer").innerHTML = "&nbsp;" + Math.round(10000*0 / (pubData.area + pvtData.area))/100 + "%";
 			//update public land data
 			//barChart.data.datasets.data[1].value = pubData.area;
-			dom.byId("highVarPer").innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";
-			barChart.update();
+			dom.byId("highVarPer").innerHTML = "&nbsp;" + Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";
+			//barChart.update();
 		}
 	}
 	
