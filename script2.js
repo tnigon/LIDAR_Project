@@ -3,9 +3,8 @@
 
 //IP address of virtual machine where ArcGIS Services can be accessed
 var virtualMachine = "54.197.237.185"
-var gp, map, landLyr, utahLyr, pieChart, drawGraphicGeom;
-var selectionToolbar;	
-	
+var gp, map, organicMatter, phosphorus, landLyr, utahLyr, barChart, drawGraphic, drawGraphicGeom, pvtGraphic, pubGraphic;
+
 //create an ArcGIS API map
 require([
 	"application/bootstrapmap", "./Chart-js/Chart.js",
@@ -50,8 +49,18 @@ function(BootstrapMap, Chart,
     esriConfig.defaults.io.alwaysUseProxy = false;
     parser.parse(); // Create all dijits.
 	var portalUrl = "http://www.arcgis.com"; //a place to store the imported zipped shapefile
-
-	//var map;
+	
+	
+	//Chart.defaults.global = { //default chart settings
+	//	showScale: true,  // Boolean - If we should show the scale at all
+	//	scaleShowLabels: true, // Boolean - Whether to show labels on the scale
+	//	responsive: true, // Boolean - whether or not the chart should be responsive and resize when the browser does
+	//	animationSteps : 100,
+	//	animationEasing : "linear",
+	//	tooltipTemplate: "<%= addCommas(value) %>"
+	//	animateRotate : true,
+	//	animateScale : true,
+	//}
 	
     // Get a reference to the ArcGIS Map class
 	var initExtent = new Extent(-12525064, 4509990, -12329386, 4621283, new SpatialReference({wkid:3857}));
@@ -119,8 +128,7 @@ function(BootstrapMap, Chart,
 		//See this link for more info: http://davidwalsh.name/fakepath
 		name = name[0].replace("c:\\fakepath\\", "");
 		
-		dom.byId('upload-status').innerHTML = '<b>Loading: </b>' + name;
-		
+		dom.byId('upload-status').innerHTML = '<b>Loading: </b>' + name + domStyle.set(loading, "display", "inline-block");
 		//Define the input params for generate see the rest doc for details
 		//http://www.arcgis.com/apidocs/rest/index.html?generate.html
 		var params = {
@@ -159,7 +167,7 @@ function(BootstrapMap, Chart,
 					return;
 				}
 				var layerName = response.featureCollection.layers[0].layerDefinition.name;
-				dom.byId('upload-status').innerHTML = '<b>Loaded: </b>' + layerName;
+				dom.byId('upload-status').innerHTML = '<b>Loaded: </b>' + layerName + domStyle.set(loading, "hide", "none");
 				addShapefileToMap(response.featureCollection);
 			}),
 			error: lang.hitch(this, errorHandler)
@@ -238,45 +246,19 @@ function(BootstrapMap, Chart,
 	geometryService.on("areas-and-lengths-complete", outputAreaAndLength);
 
 	function getAreaAndLength(evtObj) { //executed on "draw-end" in initTools()
+		tb.deactivate(); //deactivates draw tool after polygon is drawn
 		var map = this,
 		drawGraphicGeom = evtObj.geometry;
 		if(drawGraphicGeom.rings[0].length <= 3){
 			alert("Polygon must have at least three vertices.");
 			return;
 		}
-		map.graphics.clear(); //clears any previous polygon that was drawn
+		//map.graphics.clear(); //clears any previous polygon that was drawn
 		
 		var drawSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
 		new SimpleLineSymbol("dash", new Color([255,0,0]), 2),
 			new Color([255,206,56,0.25]))
 		drawGraphic = map.graphics.add(new Graphic(drawGraphicGeom, drawSymbol));
-		
-		//function clipQuality(drawGraphicGeom, utahLyr) {
-		//	//Get part of drawGraphicGeom within Dakota County
-		//	var within = geometryEngine.within(drawGraphicGeom, utahLyr.graphics[0].geometry);
-		//	//check if drawGraphicGeom overlaps Dakota County
-		//	var overlaps = geometryEngine.overlaps(drawGraphicGeom, utahLyr.graphics[0].geometry);
-		//	if(!within && overlaps){
-		//		//If field boundary overlaps Dakota County, then adjust drawGraphic to only the portion within Dakota County  
-		//		drawGraphicGeom = geometryEngine.intersect(drawGraphicGeom, utahLyr.graphics[0].geometry);
-		//	}
-		//	if(!within && !overlaps){
-		//		//If field boundary is completely outside Dakota County, then warn the user
-		//		console.log("outside of utah!");
-		//		alert("Please choose an area within Dakota County, MN");
-		//		return;
-		//	}
-		//	//finally, clip Quality layer based on drawGraphicGeom
-		//	utahLyrGeom = geometryEngine.intersect(utahLyr.graphics[0].geometry, drawGraphicGeom);
-	    //
-		//	//generateChart() adds graphic to map, so no need to do it here;
-		//	//utahGraphic = map.graphics.add(new Graphic(utahLyrGeom, drawSymbol));
-		//	
-		//	//then generate statistics and make chart
-		//	var privateLand = getPrivateLand(utahLyrGeom);
-		//	var publicLand = getPublicLand(utahLyrGeom, privateLand.geom);
-		//	generateChart(privateLand, publicLand);
-		//}
 		
 		//Get part of drawGraphicGeom within Dakota County
 		var within = geometryEngine.within(drawGraphicGeom, utahLyr.graphics[0].geometry);
@@ -305,18 +287,18 @@ function(BootstrapMap, Chart,
 		
 		var queryTaskTouches = new QueryTask(drawGraphic); //once graphic is present, get it's query info
 		var firstGraphic = null;
-		query = new Query();
-		//firstGraphic = drawGraphic.featureSet.features[0];
-		firstGraphic = drawGraphic;
-		var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
-		//firstGraphic.setSymbol(symbol);
-		//firstGraphic = evtObj.featureSet.features[0];
-		//firstGraphic = drawGraphic.featureSet.features[0];
-		//firstGraphic.setInfoTemplate(infoTemplate);
-		//map.graphics.add(firstGraphic);
-		query.geometry = webMercatorUtils.webMercatorToGeographic(drawGraphic.geometry);
-		query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-		//drawGraphicExists = 1;
+		//query = new Query();
+		////firstGraphic = drawGraphic.featureSet.features[0];
+		//firstGraphic = drawGraphic;
+		//var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleFillSymbol.STYLE_SOLID, new Color([100, 100, 100]), 3), new Color([255, 0, 0, 0.20]));
+		////firstGraphic.setSymbol(symbol);
+		////firstGraphic = evtObj.featureSet.features[0];
+		////firstGraphic = drawGraphic.featureSet.features[0];
+		////firstGraphic.setInfoTemplate(infoTemplate);
+		////map.graphics.add(firstGraphic);
+		//query.geometry = webMercatorUtils.webMercatorToGeographic(drawGraphic.geometry);
+		//query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+		////drawGraphicExists = 1;
 		
 		//setup the parameters for the areas and lengths operation
 		var areasAndLengthParams = new AreasAndLengthsParameters();
@@ -327,16 +309,23 @@ function(BootstrapMap, Chart,
 			areasAndLengthParams.polygons = simplifiedGeometries;
 			geometryService.areasAndLengths(areasAndLengthParams);
 			});
-		tb.deactivate(); //deactivates draw tool after polygon is drawn
+		//tb.deactivate(); //deactivates draw tool after polygon is drawn
 		map.showZoomSlider();
 	}
 	
+	//addCommas inserts commas into numbers at thousands separators
+	window.addCommas = function(num) {
+		var parts = num.toString().split(".");
+		parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		return parts.join(".");
+	}
+
 	//function to display the area and perimeter data from hand-drawn polygon
 	function outputAreaAndLength(evtObj) {
 		var result = evtObj.result;
 		console.log(json.stringify(result));
-		dom.byId("area").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + result.areas[0].toFixed(1) + " Ac";
-		dom.byId("perimeter").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;" + result.lengths[0].toFixed(0) + " Ft";
+		dom.byId("area").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + addCommas(result.areas[0].toFixed(1)) + " Ac";
+		dom.byId("perimeter").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;" + addCommas(result.lengths[0].toFixed(0)) + " Ft";
 	}
 
 	//Add a click handler that lets the user draw a polygon when clicking
@@ -347,12 +336,18 @@ function(BootstrapMap, Chart,
 			//Resets the "Draw Boundary" button so it displays as such again
 			var theText = "Draw Boundary";
 			$("#draw-boundary option:contains(" + theText + ")").attr('selected', 'selected');
+			map.graphics.remove(drawGraphic);
+			map.graphics.remove(pvtGraphic);
+			map.graphics.remove(pubGraphic);
 			}
 		else if(e.value=="freehand-polygon"){
 			tb.activate(Draw["FREEHAND_POLYGON"]);
 			//Resets the "Draw Boundary" button so it displays as such again
 			var theText = "Draw Boundary";
 			$("#draw-boundary option:contains(" + theText + ")").attr('selected', 'selected');
+			map.graphics.remove(drawGraphic);
+			map.graphics.remove(pvtGraphic);
+			map.graphics.remove(pubGraphic);
 		}
 	};
 	
@@ -381,12 +376,21 @@ function(BootstrapMap, Chart,
 	$( "#clear-boundary" ).click(function() {
 		//alert( "This will remove your boundary from the map. Are you sure?" );
 		map.graphics.remove(drawGraphic);
+		map.graphics.remove(pvtGraphic);
+		map.graphics.remove(pubGraphic);
 		var organicMatter = 0;
 		var phosphorus = 0;
 		dom.byId("area").innerHTML = "";
 		dom.byId("perimeter").innerHTML = "";
 		dom.byId("OM").innerHTML = "";
 		dom.byId("phos").innerHTML = "";
+		barChart.clear();
+		removeChartData = function() {
+			for (var i = 0, il = 3; i < il; i++) {
+				barChart.removeData()
+			}
+		}
+		removeChartData();
 	});
 //============ End clear boundary code ===========================
 
@@ -450,12 +454,12 @@ function(BootstrapMap, Chart,
 	//Code clips by utahLyr, so we should replace utahLyr.graphics[0].geometry with drawGraphicGeom
 	var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
 	landLyr = new FeatureLayer(landUrl, {
-	opacity: 0.7,
+	opacity: 0,
 	definitionExpression: "STATE_LGD = 'Private'"
 	});
 	utahLyr = new FeatureLayer(statesUrl, {
 	definitionExpression: "STATE_NAME = 'Utah'",
-	opacity: 1
+	opacity: 0
 	});
 	
 	var pvtRenderer = new SimpleRenderer(new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color("black"), 0), new Color([211,222,4,1])));
@@ -464,11 +468,169 @@ function(BootstrapMap, Chart,
 	//map.addLayers(landLyr);
 	//drawGraphic = map.graphics.add(new Graphic(drawGraphicGeom, drawSymbol));
 	//Layer symbology    
-	var buffSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 1]), 3), null);
-	var buffSymFade = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 0.4]), 10), null);
-	var privateSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([138, 138, 138, 0.7]));
-	var publicSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([161, 255, 156, 0.7]));
+	//var buffSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 1]), 3), null);
+	//var buffSymFade = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255, 0.4]), 10), null);
+	var privateSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([0,128,0, 0.7]));
+	var publicSym = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color([0, 0, 0]), 0), new Color([255,0,0, 0.7]));
 	var update = 0;
+	
+	function getPrivateLand(geom){
+		var privateLandGraphics = landLyr.graphics;
+		var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
+		//Only work with private land that intersects the buffer (essentially a select by location)  
+		var priInBuffer = arrayUtils.filter(privateLandGeoms, function(item, i){
+			if(geometryEngine.intersects(item, geom)){
+			return item;
+			}
+		});
+		if (priInBuffer.length > 0){
+			//merge all the private land features that intersects buffer into one feature
+			var privateUnion = geometryEngine.union(priInBuffer);
+			//get intersection of buffer and merge (cookie cutter)
+			var privateIntersect = geometryEngine.intersect(privateUnion, geom);
+			return {
+			geom: privateIntersect,
+			area: calcArea(privateIntersect)  //get the area of the private land
+			}  
+		}
+		else{
+			return {
+			geom: null,
+			area: 0
+			}
+		} 
+	}
+	
+	function getPublicLand(buffer, privateLand){
+		if(privateLand){
+			//most land that isn't private is public (city, county, state, or federally owned)     
+			var publicLand = geometryEngine.difference(buffer, privateLand);
+			return {
+			geom: publicLand,
+			area: calcArea(publicLand)
+			}  
+		} else {
+			return {
+			geom: buffer,
+			area: calcArea(buffer)
+			}
+		}
+	}
+	
+	function calcArea(geom){
+		return (Math.round(geometryEngine.geodesicArea(geom, "acres")*10) / 10);
+	}
+	
+	//Global defaults for Chart.js
+	Chart.defaults.global.responsive = true;
+	Chart.defaults.global.maintainAspectRatio = true;
+	Chart.defaults.global.animationEasing = "linear";
+	Chart.defaults.global.tooltipTemplate = "<%= addCommas(value) %>"
+	Chart.defaults.global.scaleLabel = "<%=addCommas(value)%>"
+	
+	Chart.types.Bar.extend({ //Adds y-axis label to charts
+		name: "BarAlt",
+		draw: function () {
+			Chart.types.Bar.prototype.draw.apply(this, arguments);
+	
+			var ctx = this.chart.ctx;
+			ctx.save();
+			// text alignment and color
+			ctx.textAlign = "center";
+			ctx.textBaseline = "bottom";
+			ctx.fillStyle = this.options.scaleFontColor;
+			// position
+			var x = this.scale.xScalePaddingLeft * 0.4;
+			var y = this.chart.height / 2;
+			// change origin
+			ctx.translate(x, y)
+			// rotate text
+			ctx.rotate(-90 * Math.PI / 180);
+			ctx.fillText(this.datasets[0].label, 0, 0);
+			ctx.restore();
+		}
+	});
+
+	function generateChart(pvtData, pubData){
+		if(pvtData.geom)
+			pvtGraphic = map.graphics.add(new Graphic(pvtData.geom, privateSym));
+		if(pubData.geom)
+			pubGraphic = map.graphics.add(new Graphic(pubData.geom, publicSym));
+		//if(!drawOpt.checked)
+		//	map.graphics.add(new Graphic(buffGeom, buffSym));
+		if(!barChart){  //if barChart is undefined, return false, otherwise return true and evaluate
+			var data = {
+				labels: ["Low", "Medium", "High"],
+				datasets: [
+					{
+						label: "Dataset 1",
+						fillColor: "rgba(53,122,56,0.9)",
+						strokeColor: "rgb(53,122,56,0.9)",
+						highlightFill: "rgb(53,122,56,1)",
+						highlightStroke: "rgb(53,122,56,1)",
+						data: [pvtData.area, 0, pubData.area]
+					}
+				]
+			};
+			
+			//label: "Low"
+			//color: "#8A8A8A",
+			//highlight: "#B5B5B5"
+			//},
+			//{
+			//label: "Government (sq mi)",
+			//value: pubData.area,
+			//color: "#99F095",
+			//highlight: "#A1FF9C"  
+			//}
+			//};
+		
+			var opts = {
+				showScale: true,  // Boolean - If we should show the scale at all
+				scaleShowLabels: true, // Boolean - Whether to show labels on the scale
+				responsive: true, // Boolean - whether or not the chart should be responsive and resize when the browser does
+				animationSteps : 100,
+				animationEasing : "linear",
+				animateRotate : true,
+				animateScale : true,
+				//scaleShowGridLines : true, //Boolean - Whether grid lines are shown across the chart
+				scaleGridLineColor : "rgba(0,0,0,.25)", //String - Color of grid lines
+				scaleShowHorizontalLines: true,  //Boolean - Whether to show horizontal lines (except X axis)
+				barValueSpacing : 5, //Number - Spacing between each of the X value sets
+				barDatasetSpacing : 1,  //Number - Spacing between data sets within X values
+				scaleShowLabels: true // Boolean - Whether to show labels on the scale
+				//scaleLabel: "      Acres" // Interpolated JS string - can access value
+			};
+			
+			var ctx = document.getElementById("myChart").getContext("2d");
+
+			barChart = new Chart(ctx).BarAlt(data, opts, { //add y-axis title to graph
+				// make enough space on the right side of the graph
+				scaleLabel: "          Acres"
+			});
+			dom.byId("lowVarPer").innerHTML = "&nbsp;" + Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";   
+			dom.byId("medVarPer").innerHTML = "&nbsp;" + Math.round(10000*0 / (pubData.area + pvtData.area))/100 + "%";  
+			dom.byId("highVarPer").innerHTML = "&nbsp;" + Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";  			
+		}
+		else{
+			//update private land data
+			barChart.addData([pvtData.area], "Low");
+			barChart.addData([0], "Medium")
+			barChart.addData([pubData.area], "High");
+			//barChart.data.datasets.data[0].value = pvtData.area;
+			//barChart.segments[0].value = pvtData.area;
+			dom.byId("lowVarPer").innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
+			dom.byId("medVarPer").innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
+			//update public land data
+			//barChart.data.datasets.data[1].value = pubData.area;
+			dom.byId("highVarPer").innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";
+			barChart.update();
+		}
+	}
+	
+	//document.getElementById ("generate-map").addEventListener ("click", clipQuality(), false);
+	
+
 	//map event handlers  
 	//on(map, "click", createBuffer);
 	//on(map, "mouse-drag", createBuffer);
@@ -544,111 +706,13 @@ function(BootstrapMap, Chart,
 	//	var publicLand = getPublicLand(utahLyrGeom, privateLand.geom);
 	//	generateChart(privateLand, publicLand);
 	//}
+
 	
-	function getPrivateLand(geom){
-		var privateLandGraphics = landLyr.graphics;
-		var privateLandGeoms = graphicsUtils.getGeometries(privateLandGraphics);
-		//Only work with private land that intersects the buffer (essentially a select by location)  
-		var priInBuffer = arrayUtils.filter(privateLandGeoms, function(item, i){
-			if(geometryEngine.intersects(item, geom)){
-			return item;
-			}
-		});
-		if (priInBuffer.length > 0){
-			//merge all the private land features that intersects buffer into one feature
-			var privateUnion = geometryEngine.union(priInBuffer);
-			//get intersection of buffer and merge (cookie cutter)
-			var privateIntersect = geometryEngine.intersect(privateUnion, geom);
-			return {
-			geom: privateIntersect,
-			area: calcArea(privateIntersect)  //get the area of the private land
-			}  
-		}
-		else{
-			return {
-			geom: null,
-			area: 0
-			}
-		} 
-	}
-	
-	function getPublicLand(buffer, privateLand){
-		if(privateLand){
-			//most land that isn't private is public (city, county, state, or federally owned)     
-			var publicLand = geometryEngine.difference(buffer, privateLand);
-			return {
-			geom: publicLand,
-			area: calcArea(publicLand)
-			}  
-		} else {
-			return {
-			geom: buffer,
-			area: calcArea(buffer)
-			}
-		}
-	}
-	
-	function calcArea(geom){
-		return (Math.round(geometryEngine.geodesicArea(geom, "square-miles")*100) / 100);
-	}
-		
-	function generateChart(pvtData, pubData){
-		if(pvtData.geom)
-			map.graphics.add(new Graphic(pvtData.geom, privateSym));
-		if(pubData.geom)
-			map.graphics.add(new Graphic(pubData.geom, publicSym));
-		//if(!drawOpt.checked)
-		//	map.graphics.add(new Graphic(buffGeom, buffSym));
-		if(!pieChart){
-			var data = [
-			{
-			label: "Private (sq mi)",
-			value: pvtData.area,
-			color: "#8A8A8A",
-			highlight: "#B5B5B5"
-			},
-			{
-			label: "Government (sq mi)",
-			value: pubData.area,
-			color: "#99F095",
-			highlight: "#A1FF9C"  
-			}
-			];
-		
-			var opts = {
-				segmentShowStroke : true,
-				segmentStrokeColor : "#fff",
-				segmentStrokeWidth : 2,
-				percentageInnerCutout : 0,
-				animationSteps : 100,
-				animationEasing : "easeOutBounce",
-				animateRotate : true,
-				animateScale : false 
-			};
-			
-			var ctx = document.getElementById("myChart").getContext("2d");
-			pieChart = new Chart(ctx).Pie(data, opts);
-			pvtPer.innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";   
-			pubPer.innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";    
-		}
-		else{
-			//update private land data
-			pieChart.segments[0].value = pvtData.area;
-			pvtPer.innerHTML = Math.round(10000*pvtData.area / (pubData.area + pvtData.area))/100 + "%";
-			//update public land data
-			pieChart.segments[1].value = pubData.area;
-			pubPer.innerHTML = Math.round(10000*pubData.area / (pubData.area + pvtData.area))/100 + "%";
-			pieChart.update();
-		}
-	}
-	
-	document.getElementById ("generate-map").addEventListener ("click", clipQuality(), false);
-		
 	//var buffOpt = dom.byId("buffOpt");
 	//var navOpt = dom.byId("navOpt");
 	//var drawOpt = dom.byId("drawOpt");
-	var pvtPer = dom.byId("privatePer");
-	var pubPer = dom.byId("publicPer");
+	//var pvtPer = dom.byId("privatePer");
+	//var pubPer = dom.byId("publicPer");
 	
 	//on(buffOpt, "click", function(evt){
 	//	if(buffOpt.checked){
@@ -698,7 +762,7 @@ function(BootstrapMap, Chart,
 	
 	//Incorporated drawGraphicGeom into getAreaAndLength function 
 	
-	var loading = dom.byId("loadingImg");    
+	var loading = dom.byId("loading");    
 	function showLoading() {
 		esri.show(loading);
 	}
@@ -707,7 +771,7 @@ function(BootstrapMap, Chart,
 		esri.hide(loading);
 	}
 	hideLoading();
-	//on(map, "update-end", hideLoading);    
+	on(map, "update-end", hideLoading);    
     
 
 
