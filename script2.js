@@ -449,16 +449,18 @@ function(BootstrapMap, Chart,
 //============ End toggle imported layer code ===========================
 
 //============ Begin Utah Clip code =============================
-	var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
-	
+	//var landUrl = "http://tlamap.trustlands.utah.gov/arcgis/rest/services/UT_SITLA_LandOwnership/MapServer/0";
+	var landUrl = "http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/DakotaQuality2/FeatureServer/0";
 	//Code clips by utahLyr, so we should replace utahLyr.graphics[0].geometry with drawGraphicGeom
-	var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
+	//var statesUrl = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer/3";
+	var statesUrl = "http://services.arcgis.com/8df8p0NlLFEShl0r/arcgis/rest/services/mn_county_boundaries/FeatureServer/0";
 	landLyr = new FeatureLayer(landUrl, {
 	opacity: 0,
 	definitionExpression: "STATE_LGD = 'Private'"
 	});
 	utahLyr = new FeatureLayer(statesUrl, {
-	definitionExpression: "STATE_NAME = 'Utah'",
+	//definitionExpression: "STATE_NAME = 'Utah'",
+	definitionExpression: "CTY_NAME = 'Dakota'",
 	opacity: 0
 	});
 	
